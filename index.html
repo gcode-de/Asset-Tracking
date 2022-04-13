@@ -127,36 +127,36 @@
 
     <script>
 
-        let ASSETS = {}
-        // const ASSETS = {
-        //     BTC: {
-        //         assetType: 'Crypto',
-        //         assetName: 'Bitcoin',
-        //         assetAbb: 'BTC',
-        //         assetQuantity: '1',
-        //         assetUnit: 'Piece',
-        //         assetValue: 1000,
-        //         assetNotes: '',
-        //     },
-        //     AAPL: {
-        //         assetType: 'Stocks',
-        //         assetName: 'Apple',
-        //         assetAbb: 'AAPL',
-        //         assetQuantity: '1',
-        //         assetUnit: 'Piece',
-        //         assetValue: 1000,
-        //         assetNotes: '',
-        //     },
-        //     GOLD: {
-        //         assetType: 'Metals',
-        //         assetName: 'Gold',
-        //         assetAbb: '',
-        //         assetQuantity: '1',
-        //         assetUnit: 'Oz',
-        //         assetValue: 1000,
-        //         assetNotes: '',
-        //     },
-        // }
+        // let ASSETS = {}
+        let ASSETS = {
+            BTC: {
+                assetType: 'Crypto',
+                assetName: 'Bitcoin',
+                assetAbb: 'BTC',
+                assetQuantity: '1',
+                assetUnit: 'Piece',
+                assetValue: 1000,
+                assetNotes: '',
+            },
+            AAPL: {
+                assetType: 'Stocks',
+                assetName: 'Apple',
+                assetAbb: 'AAPL',
+                assetQuantity: '1',
+                assetUnit: 'Piece',
+                assetValue: 1000,
+                assetNotes: '',
+            },
+            GOLD: {
+                assetType: 'Metals',
+                assetName: 'Gold',
+                assetAbb: '',
+                assetQuantity: '1',
+                assetUnit: 'Oz',
+                assetValue: 1000,
+                assetNotes: '',
+            },
+        }
 
         let totalValue
 
@@ -198,17 +198,69 @@
         }
 
         //display assetForm
-        function displayAssetForm() {
-            document.querySelector('#assetForm-hidden').setAttribute('id', 'assetForm') //hide assetForm
+        function displayAssetForm(thisAssetType = '', thisAssetName = '', thisAssetQuantity = '', thisAssetNotes = '') {
+            document.querySelector('#assetForm').innerHTML = `
+            <form onsubmit="addAsset(this); return false;">
+                <datalist id="assetTypeList">
+                    <option value="Crypto">
+                    <option value="Stocks">
+                    <option value="Metals">
+                </datalist>
+                <datalist id="Metals">
+                    <option value="Gold">
+                    <option value="Silver">
+                </datalist>
+                <datalist id="Stocks">
+                    <option value="Apple">
+                    <option value="Meta">
+                    <option value="Alphabet">
+                    <option value="Amazon">
+                </datalist>
+                <datalist id="Crypto">
+                    <option value="Bitcoin">
+                    <option value="Ether">
+                    <option value="Dogecoin">
+                    <option value="Solana">
+                </datalist>
+
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" list="assetTypeList" id="assetTypeField" value="${thisAssetType}">
+                    <label class="mdl-textfield__label" for="assetTypeField">Type</label>
+                </div>
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" id="assetNameField" value="${thisAssetName}" onclick="setAssetType()"">
+                    <label class="mdl-textfield__label" for="assetNameField">Asset</label>
+                </div>
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?"
+                        id="assetQuantityField" value="${thisAssetQuantity}">
+                    <label class="mdl-textfield__label" for="assetQuantityField"
+                        id="assetQuantityLabel">Quantity</label>
+                    <span class="mdl-textfield__error">Input is not a number!</span>
+                    <span id="assetUnitField"></span>
+                </div>
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" id="assetNotesField" value="${thisAssetNotes}">
+                    <label class="mdl-textfield__label" for="assetNotesField">Notes</label>
+                </div>
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="submit">
+                    Save
+                </button>
+            </form>
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="hideAssetForm()">
+                Cancel
+            </button>
+            `
         }
 
-        //hide assetForm and clear input fields
+        //hide assetForm and clear input fields and error message
         function hideAssetForm() {
-            document.querySelector('#assetForm').setAttribute('id', 'assetForm-hidden') //hide assetForm
-            assetTypeField.value = '';
-            assetNameField.value = '';
-            assetQuantityField.value = '';
-            assetNotesField.value = '';
+            document.querySelector('#assetForm').innerHTML = ''; //hide assetForm
+            // assetTypeField.value = '';
+            // assetNameField.value = '';
+            // assetQuantityField.value = '';
+            // assetNotesField.value = '';
+            displayError('')
         }
 
         //Prepare assetNameField dropdown and assetUnit in Form according to assetTypeField
@@ -290,11 +342,12 @@
         }
 
         function editAsset(singleAsset) {
-            alert('edit...', singleAsset);
-            updateLocalStorage();
-            calcTotalValue();
-            hideAssetForm()
-            displayAssets();
+            console.log(ASSETS[singleAsset].assetName);
+            displayAssetForm(ASSETS[singleAsset].assetType, ASSETS[singleAsset].assetName, ASSETS[singleAsset].assetQuantity, ASSETS[singleAsset].assetNotes);
+            // updateLocalStorage();
+            // calcTotalValue();
+            // hideAssetForm()
+            // displayAssets();
         }
 
         function updateLocalStorage() {
@@ -345,59 +398,7 @@
     <div id="wrapper">
         <h1>Track yo assets!</h1>
 
-        <div id="assetForm-hidden" class="layoutElement">
-            <!-- Simple Textfield -->
-            <form onsubmit="addAsset(this); return false;">
-                <datalist id="assetTypeList">
-                    <option value="Crypto">
-                    <option value="Stocks">
-                    <option value="Metals">
-                </datalist>
-                <datalist id="Metals">
-                    <option value="Gold">
-                    <option value="Silver">
-                </datalist>
-                <datalist id="Stocks">
-                    <option value="Apple">
-                    <option value="Meta">
-                    <option value="Alphabet">
-                    <option value="Amazon">
-                </datalist>
-                <datalist id="Crypto">
-                    <option value="Bitcoin">
-                    <option value="Ether">
-                    <option value="Dogecoin">
-                    <option value="Solana">
-                </datalist>
-
-                <div class="mdl-textfield mdl-js-textfield">
-                    <input class="mdl-textfield__input" type="text" list="assetTypeList" id="assetTypeField">
-                    <label class="mdl-textfield__label" for="assetTypeField">Type</label>
-                </div>
-                <div class="mdl-textfield mdl-js-textfield">
-                    <input class="mdl-textfield__input" type="text" id="assetNameField" onclick="setAssetType()">
-                    <label class="mdl-textfield__label" for="assetNameField">Asset</label>
-                </div>
-                <div class="mdl-textfield mdl-js-textfield">
-                    <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?"
-                        id="assetQuantityField">
-                    <label class="mdl-textfield__label" for="assetQuantityField"
-                        id="assetQuantityLabel">Quantity</label>
-                    <span class="mdl-textfield__error">Input is not a number!</span>
-                    <span id="assetUnitField"></span>
-                </div>
-                <div class="mdl-textfield mdl-js-textfield">
-                    <input class="mdl-textfield__input" type="text" id="assetNotesField">
-                    <label class="mdl-textfield__label" for="assetNotesField">Notes</label>
-                </div>
-                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="submit">
-                    Save
-                </button>
-            </form>
-            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="hideAssetForm()">
-                Cancel
-            </button>
-
+        <div id="assetForm" class="layoutElement">
         </div>
         <div id="error"></div>
 
