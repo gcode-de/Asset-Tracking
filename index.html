@@ -158,6 +158,8 @@
             },
         }
 
+        let DELETED_ASSET = {}
+
         let totalValue
 
         const assetQuantityUnits = [
@@ -166,26 +168,107 @@
             { name: 'Crypto', unit: ' pieces' },
         ];
 
-        const assetAbbs = [
-            { name: 'Bitcoin', abb: ' pieces' },
-            { name: 'Bitcoin', abb: ' pieces' },
-            { name: 'Bitcoin', abb: ' pieces' },
-            { name: 'Bitcoin', abb: ' pieces' },
-            { name: 'Bitcoin', abb: ' pieces' },
-            { name: 'Bitcoin', abb: ' pieces' },
-            { name: 'Bitcoin', abb: ' pieces' },
-            { name: 'Bitcoin', abb: ' pieces' },
-            { name: 'Bitcoin', abb: ' pieces' },
-            { name: 'Bitcoin', abb: ' pieces' },
+        const assetCodes = {
+            "ADA": "Cardano",
+            "ALU": "Aluminum",
+            "AAPL": "Apple",
+            "ABEA": "Alphabet",
+            "AMZ": "Amazon",
+            "BCH": "Bitcoin Cash",
+            "BTC": "Bitcoin",
+            "ETH": "Ethereum",
+            "IRD": "Iridium",
+            "LCO": "Cobalt",
+            "LINK": "Chainlink",
+            "LTC": "Litecoin",
+            "FB2A": "Meta",
+            "NI": "Nickel",
+            "RUTH": "Ruthenium",
+            "UNI": "Uniswap",
+            "XAG": "Silver",
+            "XAU": "Gold",
+            "XCU": "Copper",
+            "XLM": "Stellar",
+            "XPD": "Palladium",
+            "XPT": "Platinum",
+            "XRH": "Rhodium",
+            "XRP": "Ripple",
+            "ZNC": "Zinc",
+        }
 
-        ];
+        const assetValues = {
+            "ADA": "Cardano",
+            "ALU": "Aluminum",
+            "AAPL": "Apple",
+            "ABEA": "Alphabet",
+            "AMZ": "Amazon",
+            "BCH": "Bitcoin Cash",
+            "BTC": "Bitcoin",
+            "ETH": "Ethereum",
+            "IRD": "Iridium",
+            "LCO": "Cobalt",
+            "LINK": "Chainlink",
+            "LTC": "Litecoin",
+            "FB2A": "Meta",
+            "NI": "Nickel",
+            "RUTH": "Ruthenium",
+            "UNI": "Uniswap",
+            "XAG": "Silver",
+            "XAU": "Gold",
+            "XCU": "Copper",
+            "XLM": "Stellar",
+            "XPD": "Palladium",
+            "XPT": "Platinum",
+            "XRH": "Rhodium",
+            "XRP": "Ripple",
+            "ZNC": "Zinc",
+        }
+
+        const valuesAPIurl = 'https://commodities-api.com/api/latest';
+        const valuesAPIkey = '?access_key=6oemg05g8508q5s2rrzn2aqjv4ig7ac7t4oz04u0bukj500tq02t6jmwhits';
+        const valuesAPIbase = '&base=EUR';
+        let valuesAPIsymbols = '&symbols='; //Add assetAbbs seperated with commas
+        let valuesAPIlink;
+
+        function updateAssetAbbs() {
+            for (let singleAsset in ASSETS) {
+                // const thisAssetAbb = assetCodes.find(assetAbb => assetCodes.value == ASSETS[singleAsset].assetName);
+                const thisAssetAbb = Object.keys(assetCodes).find(key => assetCodes[key] === ASSETS[singleAsset].assetName);
+                ASSETS[singleAsset].assetAbb = thisAssetAbb;
+            }
+            updateLocalStorage();
+        }
+
+        async function updateAssetValues() {
+            for (let singleAsset in assetValues) {
+                valuesAPIsymbols += singleAsset;
+                valuesAPIsymbols += ',';
+            }
+            valuesAPIsymbols = valuesAPIsymbols.slice(0, -1);
+            valuesAPIlink = valuesAPIurl + valuesAPIkey + valuesAPIbase + valuesAPIsymbols
+
+            try {
+                let response = await fetch(valuesAPIlink);
+                assetValues = await response.json();
+                console.log(assetValues);
+            } catch (e) { //what to do if methos does not work
+                displayToast('Asset values could not be updated!')
+            };
+            calcTotalValue()
+            updateLocalStorage();
+            displayToast('Values updated!')
+        }
 
         //SETUP
         window.addEventListener('load', function () {
             //Load ASSET from localstorage and display them
             ASSETS = JSON.parse(localStorage.getItem("ASSETS"));
+            //get currentValues from API
+            updateAssetAbbs()
+            // updateAssetValues()
             calcTotalValue()
             displayAssets()
+
         })
 
         function calcTotalValue() {
@@ -207,8 +290,16 @@
                     <option value="Metals">
                 </datalist>
                 <datalist id="Metals">
+                    <option value="Aluminum">
+                    <option value="Cobalt">
+                    <option value="Copper">
                     <option value="Gold">
-                    <option value="Silver">
+                    <option value="Nickel">
+                    <option value="Palladium">
+                    <option value="Platinum">
+                    <option value="Ruthenium">
+                    <option value="Silver">  
+                    <option value="Zinc">
                 </datalist>
                 <datalist id="Stocks">
                     <option value="Apple">
@@ -218,29 +309,36 @@
                 </datalist>
                 <datalist id="Crypto">
                     <option value="Bitcoin">
-                    <option value="Ether">
+                    <option value="Bitcoin Cash">
+                    <option value="Cardano">
+                    <option value="ChainLink">
+                    <option value="Ethereum">
                     <option value="Dogecoin">
+                    <option value="Litecoin">
+                    <option value="Ripple">
                     <option value="Solana">
+                    <option value="Stellar">
+                    <option value="Uniswap">
                 </datalist>
 
                 <div class="mdl-textfield mdl-js-textfield">
-                    <input class="mdl-textfield__input" type="text" list="assetTypeList" id="assetTypeField" value="${thisAssetType}">
+                    <input class="mdl-textfield__input" type="text" list="assetTypeList" id="assetTypeField" autocomplete="off" value="${thisAssetType}">
                     <label class="mdl-textfield__label" for="assetTypeField">Type</label>
                 </div>
                 <div class="mdl-textfield mdl-js-textfield">
-                    <input class="mdl-textfield__input" type="text" id="assetNameField" value="${thisAssetName}" onclick="setAssetType()"">
+                    <input class="mdl-textfield__input" type="text" id="assetNameField" value="${thisAssetName}" autocomplete="off" onclick="setAssetType()"">
                     <label class="mdl-textfield__label" for="assetNameField">Asset</label>
                 </div>
                 <div class="mdl-textfield mdl-js-textfield">
                     <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?"
-                        id="assetQuantityField" value="${thisAssetQuantity}">
+                        id="assetQuantityField" autocomplete="off" value="${thisAssetQuantity}">
                     <label class="mdl-textfield__label" for="assetQuantityField"
                         id="assetQuantityLabel">Quantity</label>
                     <span class="mdl-textfield__error">Input is not a number!</span>
                     <span id="assetUnitField"></span>
                 </div>
                 <div class="mdl-textfield mdl-js-textfield">
-                    <input class="mdl-textfield__input" type="text" id="assetNotesField" value="${thisAssetNotes}">
+                    <input class="mdl-textfield__input" type="text" id="assetNotesField" autocomplete="off" value="${thisAssetNotes}">
                     <label class="mdl-textfield__label" for="assetNotesField">Notes</label>
                 </div>
                 <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="submit">
@@ -260,13 +358,12 @@
             // assetNameField.value = '';
             // assetQuantityField.value = '';
             // assetNotesField.value = '';
-            displayError('')
         }
 
         //Prepare assetNameField dropdown and assetUnit in Form according to assetTypeField
         function setAssetType() {
             if (document.getElementById("assetTypeField").value === "") {
-                displayError('Chose asset type first!')
+                displayToast('Chose asset type first!')
                 return
             }
             const assetType = document.getElementById("assetTypeField").value
@@ -291,19 +388,19 @@
         function addAsset(form) {
             //Make sure form is filled completely
             if (form.assetTypeField.value === "") {
-                displayError('Enter asset type!')
+                displayToast('Enter asset type!')
                 return
             }
             if (form.assetNameField.value === "") {
-                displayError('Enter asset name!')
+                displayToast('Enter asset name!')
                 return
             }
             if (form.assetTypeField.value === "") {
-                displayError('Chose asset type!')
+                displayToast('Chose asset type!')
                 return
             }
             if (form.assetQuantityField.value === "") {
-                displayError('Enter asset quantity!')
+                displayToast('Enter asset quantity!')
                 return
             }
 
@@ -323,22 +420,35 @@
 
             //Push asset to ASSETS
             ASSETS[form.assetNameField.value] = { assetType: form.assetTypeField.value, assetName: form.assetNameField.value, assetAbb: "", assetQuantity: form.assetQuantityField.value, assetUnit: thisAssetQuantityUnit, assetValue: "", assetNotes: form.assetNotesField.value }
-            displayError('Asset added successfully!')
-
-            updateLocalStorage();
+            displayToast('Asset added successfully!')
+            updateAssetAbbs()
+            updateAssetValues()
             calcTotalValue();
+            updateLocalStorage();
             hideAssetForm()
             displayAssets();
         }
 
         function deleteAsset(singleAsset, singleAssetName) {
-            if (confirm('Sure, you want to delete Asset "' + singleAssetName + '"?') === false)
+            if (confirm('Sure, you want to delete Asset "' + singleAssetName + '"?') === false)     // alert('löschen...');
                 return
+            DELETED_ASSET = ASSETS[singleAsset];
             delete ASSETS[singleAsset]
-            // alert('löschen...');
+
             updateLocalStorage();
             calcTotalValue();
             displayAssets();
+            // displayToast('Asset "' + singleAssetName + '" deleted.');
+            displaySnackbar(('Asset "' + singleAssetName + '" deleted.'), 'undo', undoDeleteAsset);
+        }
+
+        function undoDeleteAsset() {
+            ASSETS[DELETED_ASSET.value] = DELETED_ASSET
+            // ASSETS.push(deletedAsset);
+            updateLocalStorage();
+            calcTotalValue();
+            displayAssets();
+            displayToast('Asset "' + DELETED_ASSET.assetName + '" restored successfully.')
         }
 
         function editAsset(singleAsset) {
@@ -355,9 +465,27 @@
             let ASSETS_serialized = JSON.stringify(ASSETS);
             localStorage.setItem("ASSETS", ASSETS_serialized)
         }
-        //Display error for wrong form inputs
-        function displayError(error) {
-            document.querySelector('#error').innerHTML = error
+
+        //Display Toast for wrong form inputs and other information
+        function displayToast(error) {
+            // var notification = document.querySelector('.mdl-js-snackbar');
+            // notification.MaterialSnackbar.showSnackbar(
+            //     {
+            //         message: error
+            //     }
+            // );
+        }
+
+        //Display Snackbar for wrong form inputs and other information
+        function displaySnackbar(error, buttonText, buttonFunction) {
+            var notification = document.querySelector('.mdl-js-snackbar');
+            var data = {
+                message: error,
+                actionHandler: function (event) { buttonFunction() },
+                actionText: buttonText,
+                timeout: 10000
+            };
+            notification.MaterialSnackbar.showSnackbar(data);
         }
 
         //Display Assets from ASSETS
@@ -400,13 +528,16 @@
 
         <div id="assetForm" class="layoutElement">
         </div>
-        <div id="error"></div>
 
         <div id="assetControls" class="layoutElement">
             <!-- Colored raised button -->
             <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
                 onclick="displayAssetForm()">
                 Add Asset
+            </button>
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                onclick="updateAssetValues()">
+                Update Values
             </button>
             <!-- <div id="assetFilters">
                 <span class="mdl-chip mdl-chip--deletable">
@@ -484,6 +615,10 @@
             <p id="total-value" class="layoutElement"></p>
             <br>
             <p class="layoutElement">This tools does...</p>
+        </div>
+        <div aria-live="assertive" aria-atomic="true" aria-relevant="text" class="mdl-snackbar mdl-js-snackbar">
+            <div class="mdl-snackbar__text"></div>
+            <button type="button" class="mdl-snackbar__action"></button>
         </div>
     </div>
 </body>
