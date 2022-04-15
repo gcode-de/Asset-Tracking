@@ -135,6 +135,7 @@
                 assetAbb: 'BTC',
                 assetQuantity: '1',
                 assetUnit: 'Piece',
+                assetBaseValue: 1000,
                 assetValue: 1000,
                 assetNotes: '',
             },
@@ -144,6 +145,7 @@
                 assetAbb: 'AAPL',
                 assetQuantity: '1',
                 assetUnit: 'Piece',
+                assetBaseValue: 1000,
                 assetValue: 1000,
                 assetNotes: '',
             },
@@ -153,6 +155,7 @@
                 assetAbb: '',
                 assetQuantity: '1',
                 assetUnit: 'Oz',
+                assetBaseValue: 1000,
                 assetValue: 1000,
                 assetNotes: '',
             },
@@ -197,31 +200,31 @@
         }
 
         const assetValues = {
-            "ADA": "Cardano",
-            "ALU": "Aluminum",
-            "AAPL": "Apple",
-            "ABEA": "Alphabet",
-            "AMZ": "Amazon",
-            "BCH": "Bitcoin Cash",
-            "BTC": "Bitcoin",
-            "ETH": "Ethereum",
-            "IRD": "Iridium",
-            "LCO": "Cobalt",
-            "LINK": "Chainlink",
-            "LTC": "Litecoin",
-            "FB2A": "Meta",
-            "NI": "Nickel",
-            "RUTH": "Ruthenium",
-            "UNI": "Uniswap",
-            "XAG": "Silver",
-            "XAU": "Gold",
-            "XCU": "Copper",
-            "XLM": "Stellar",
-            "XPD": "Palladium",
-            "XPT": "Platinum",
-            "XRH": "Rhodium",
-            "XRP": "Ripple",
-            "ZNC": "Zinc",
+            "ADA": 0.3,
+            "ALU": 10,
+            "AAPL": 2000,
+            "ABEA": 1500,
+            "AMZ": 500,
+            "BCH": 1000,
+            "BTC": 40000,
+            "ETH": 6000,
+            "IRD": 50,
+            "LCO": 50,
+            "LINK": 50,
+            "LTC": 200,
+            "FB2A": 800,
+            "NI": 200,
+            "RUTH": 200,
+            "UNI": 50,
+            "XAG": 25,
+            "XAU": 1600,
+            "XCU": 200,
+            "XLM": 15,
+            "XPD": 3000,
+            "XPT": 5000,
+            "XRH": 2000,
+            "XRP": 0.8,
+            "ZNC": 500,
         }
 
         const valuesAPIurl = 'https://commodities-api.com/api/latest';
@@ -232,7 +235,6 @@
 
         function updateAssetAbbs() {
             for (let singleAsset in ASSETS) {
-                // const thisAssetAbb = assetCodes.find(assetAbb => assetCodes.value == ASSETS[singleAsset].assetName);
                 const thisAssetAbb = Object.keys(assetCodes).find(key => assetCodes[key] === ASSETS[singleAsset].assetName);
                 ASSETS[singleAsset].assetAbb = thisAssetAbb;
             }
@@ -240,6 +242,7 @@
         }
 
         async function updateAssetValues() {
+            //generate API request
             for (let singleAsset in assetValues) {
                 valuesAPIsymbols += singleAsset;
                 valuesAPIsymbols += ',';
@@ -247,28 +250,52 @@
             valuesAPIsymbols = valuesAPIsymbols.slice(0, -1);
             valuesAPIlink = valuesAPIurl + valuesAPIkey + valuesAPIbase + valuesAPIsymbols
 
-            try {
-                let response = await fetch(valuesAPIlink);
-                assetValues = await response.json();
-                console.log(assetValues);
-            } catch (e) { //what to do if methos does not work
-                displayToast('Asset values could not be updated!')
-            };
-            calcTotalValue()
+            //get assetValues from API
+            // try {
+            //     let response = await fetch(valuesAPIlink);
+            //     console.log(response);
+            //     // console.log(response.json());
+            //     assetValues = await response.json();
+            //     console.log(assetValues); //warum wird hier nichts gelogt?
+            //     console.log(assetValues.rates);
+            // } catch (e) { //what to do if methos does not work
+            //     displayToast('Asset values could not be updated!')
+            // };
+
+            //Update assetBaseValue
+            for (let singleAsset in ASSETS) {
+                // const thisAssetBaseValue = Object.values(assetValues).find(value => assetValues[name] === ASSETS[singleAsset].assetAbb);
+                const thisAssetAbb = ASSETS[singleAsset].assetAbb
+                const thisAssetBaseValue = assetValues[thisAssetAbb]
+                ASSETS[singleAsset].assetBaseValue = thisAssetBaseValue;
+            }
+
+            //calculate assetValue (assetBaseValue * assetQuantity)
+            for (let singleAsset in ASSETS) {
+                ASSETS[singleAsset].assetValue = ASSETS[singleAsset].assetBaseValue * ASSETS[singleAsset].assetQuantity;
+            }
+
+
+            //Update local storage and browser
+            calcTotalValue();
             updateLocalStorage();
-            displayToast('Values updated!')
+            displayAssets();
+            displayToast('Asset values updated.');
         }
 
         //SETUP
         window.addEventListener('load', function () {
-            //Load ASSET from localstorage and display them
-            ASSETS = JSON.parse(localStorage.getItem("ASSETS"));
-            //get currentValues from API
-            updateAssetAbbs()
-            // updateAssetValues()
-            calcTotalValue()
-            displayAssets()
+            //Load ASSET from localstorage if available
+            if (JSON.parse(localStorage.getItem("ASSETS")) != null) {
+                ASSETS = JSON.parse(localStorage.getItem("ASSETS"));
+            }
 
+            //get currentValues from API
+            updateAssetAbbs();
+            updateAssetValues();
+            updateLocalStorage();
+            calcTotalValue();
+            displayAssets();
         })
 
         function calcTotalValue() {
@@ -277,7 +304,7 @@
             for (let singleAsset in ASSETS) {
                 totalValue = totalValue + ASSETS[singleAsset].assetValue
             }
-            document.querySelector('#total-value').innerHTML = `Total Worth: ${totalValue} €`;
+            document.querySelector('#total-value').innerHTML = `Total Worth: ${totalValue.toLocaleString("de-DE")} €`;
         }
 
         //display assetForm
@@ -420,7 +447,7 @@
 
             //Push asset to ASSETS
             ASSETS[form.assetNameField.value] = { assetType: form.assetTypeField.value, assetName: form.assetNameField.value, assetAbb: "", assetQuantity: form.assetQuantityField.value, assetUnit: thisAssetQuantityUnit, assetValue: "", assetNotes: form.assetNotesField.value }
-            displayToast('Asset added successfully!')
+            displayToast('Asset saved successfully!')
             updateAssetAbbs()
             updateAssetValues()
             calcTotalValue();
@@ -452,7 +479,6 @@
         }
 
         function editAsset(singleAsset) {
-            console.log(ASSETS[singleAsset].assetName);
             displayAssetForm(ASSETS[singleAsset].assetType, ASSETS[singleAsset].assetName, ASSETS[singleAsset].assetQuantity, ASSETS[singleAsset].assetNotes);
             // updateLocalStorage();
             // calcTotalValue();
@@ -468,12 +494,12 @@
 
         //Display Toast for wrong form inputs and other information
         function displayToast(error) {
-            // var notification = document.querySelector('.mdl-js-snackbar');
-            // notification.MaterialSnackbar.showSnackbar(
-            //     {
-            //         message: error
-            //     }
-            // );
+            var notification = document.querySelector('.mdl-js-snackbar');
+            notification.MaterialSnackbar.showSnackbar(
+                {
+                    message: error
+                }
+            );
         }
 
         //Display Snackbar for wrong form inputs and other information
@@ -502,7 +528,7 @@
                     </div>
                     <div class="mdl-card__supporting-text">
                         ${ASSETS[singleAsset].assetQuantity} ${ASSETS[singleAsset].assetUnit}<br>
-                        Value: ${ASSETS[singleAsset].assetValue}€<br>
+                        Value: ${ASSETS[singleAsset].assetValue.toLocaleString("de-DE")}€<br>
                         Notes: ${ASSETS[singleAsset].assetNotes}
                     </div>
                     <div class="mdl-card__actions mdl-card--border">
