@@ -227,6 +227,8 @@
             "ZNC": 500,
         }
 
+        let apiUpdated
+
         const valuesAPIurl = 'https://commodities-api.com/api/latest';
         const valuesAPIkey = '?access_key=6oemg05g8508q5s2rrzn2aqjv4ig7ac7t4oz04u0bukj500tq02t6jmwhits';
         const valuesAPIbase = '&base=EUR';
@@ -250,20 +252,49 @@
             valuesAPIsymbols = valuesAPIsymbols.slice(0, -1);
             valuesAPIlink = valuesAPIurl + valuesAPIkey + valuesAPIbase + valuesAPIsymbols
 
-            // let assetValues
 
-            //get assetValues from API
+            let assetValuesFromApi = {
+                "ADA": 1.193330973679504,
+                "ALU": 10.514131371630041,
+                "BCH": 0.0033696857249744575,
+                "BTC": 0.000027339894361282296,
+                "ETH": 0.00036791100378043246,
+                "IRD": 0.0002160703832587034,
+                "LCO": 0.02921272565975125,
+                "LINK": 0.08032822952760443,
+                "LTC": 0.010056770315122874,
+                "NI": 0.00003252599096522526,
+                "RUTH": 0.0014403972198641973,
+                "UNI": 0.11888624033728191,
+                "XAG": 0.041357832033735754,
+                "XAU": 0.0005424889761551438,
+                "XCU": 3.573590625642131,
+                "XLM": 5.520685882314111,
+                "XPD": 0.0004573520381290784,
+                "XPT": 0.001059369727054926,
+                "XRP": 1.4430462888642641,
+                "ZNC": 0.0002414652785689414
+            }
+
+            // get assetValues from API
             try {
                 let response = await fetch(valuesAPIlink);
-                console.log(response);
-                // console.log(response.json());
-                assetValues = await response.json();
-                console.log(assetValues); //warum wird hier nichts gelogt?
-                console.log(assetValues.rates);
-            } catch (e) { //what to do if methos does not work
+                assetValuesFromApi = await response.json();
+                assetValuesFromApi = assetValuesFromApi.data.rates;
+            } catch (e) {
                 console.error(e);
                 displayToast('Asset values could not be updated!')
             };
+
+
+            for (let index in assetValues) {
+                if (assetValuesFromApi[index] != null) {
+                    assetValues[index] = (1 / assetValuesFromApi[index]).toFixed(2);
+                    // console.log(index, [index]);
+                } else { console.log(index, 'not received from API'); }
+            }
+
+            console.log(assetValues);
 
             //Update assetBaseValue
             for (let singleAsset in ASSETS) {
@@ -271,6 +302,7 @@
                 const thisAssetAbb = ASSETS[singleAsset].assetAbb
                 const thisAssetBaseValue = assetValues[thisAssetAbb]
                 ASSETS[singleAsset].assetBaseValue = thisAssetBaseValue;
+                // console.log('updated assetBaseValue');
             }
 
             //calculate assetValue (assetBaseValue * assetQuantity)
@@ -311,7 +343,8 @@
         }
 
         //display assetForm
-        function displayAssetForm(thisAssetType = '', thisAssetName = '', thisAssetQuantity = '', thisAssetNotes = '') {
+        function displayAssetForm(thisAssetType = '', thisAssetName = '', thisAssetQuantity = '', thisAssetNotes = '', isdirty = false) {
+            console.log(isdirty);
             document.querySelector('#assetForm').innerHTML = `
             <form onsubmit="addAsset(this); return false;">
                 <datalist id="assetTypeList">
@@ -351,15 +384,15 @@
                     <option value="Uniswap">
                 </datalist>
 
-                <div class="mdl-textfield mdl-js-textfield">
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label ${isdirty ? 'is-dirty' : ''}">
                     <input class="mdl-textfield__input" type="text" list="assetTypeList" id="assetTypeField" autocomplete="off" value="${thisAssetType}">
                     <label class="mdl-textfield__label" for="assetTypeField">Type</label>
                 </div>
-                <div class="mdl-textfield mdl-js-textfield">
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label ${isdirty ? 'is-dirty' : ''}">
                     <input class="mdl-textfield__input" type="text" id="assetNameField" value="${thisAssetName}" autocomplete="off" onclick="setAssetType()"">
                     <label class="mdl-textfield__label" for="assetNameField">Asset</label>
                 </div>
-                <div class="mdl-textfield mdl-js-textfield">
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label ${isdirty ? 'is-dirty' : ''}">
                     <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?"
                         id="assetQuantityField" autocomplete="off" value="${thisAssetQuantity}">
                     <label class="mdl-textfield__label" for="assetQuantityField"
@@ -367,7 +400,7 @@
                     <span class="mdl-textfield__error">Input is not a number!</span>
                     <span id="assetUnitField"></span>
                 </div>
-                <div class="mdl-textfield mdl-js-textfield">
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label ${isdirty ? 'is-dirty' : ''}">
                     <input class="mdl-textfield__input" type="text" id="assetNotesField" autocomplete="off" value="${thisAssetNotes}">
                     <label class="mdl-textfield__label" for="assetNotesField">Notes</label>
                 </div>
@@ -482,7 +515,8 @@
         }
 
         function editAsset(singleAsset) {
-            displayAssetForm(ASSETS[singleAsset].assetType, ASSETS[singleAsset].assetName, ASSETS[singleAsset].assetQuantity, ASSETS[singleAsset].assetNotes);
+            displayAssetForm(ASSETS[singleAsset].assetType, ASSETS[singleAsset].assetName, ASSETS[singleAsset].assetQuantity, ASSETS[singleAsset].assetNotes, true);
+
             // updateLocalStorage();
             // calcTotalValue();
             // hideAssetForm()
