@@ -211,6 +211,7 @@
             "XPT": "Platinum",
             "XRP": "Ripple",
             "ZNC": "Zinc",
+            "USD": "USD per EURO",
         }
 
         let assetValues = {
@@ -238,6 +239,7 @@
             "XPT": 5000,
             "XRP": 0.8,
             "ZNC": 500,
+            "USD": 1,
         }
 
         const valuesAPIurl = 'https://commodities-api.com/api/latest';
@@ -251,7 +253,6 @@
         const valuesAPI2base = '&base=EUR';
         let valuesAPI2symbols = '&symbols='; //Add assetAbbs seperated with commas
         let valuesAPI2link;
-        let euroPerUsd = 1 / 1.08;
 
         // MXrzxkKCX04jatCdZBkaO6yYOJji3m4r2ZhUKd5e
 
@@ -293,10 +294,9 @@
                 "XPD": 0.0004573520381290784,
                 "XPT": 0.001059369727054926,
                 "XRP": 1.4430462888642641,
-                "ZNC": 0.0002414652785689414
+                "ZNC": 0.0002414652785689414,
+                "USD": 1,
             };
-
-            let assetValuesFromApi2 = {};
 
             // get assetValues from API1
             try {
@@ -307,7 +307,9 @@
                 console.error(e);
                 displayToast('Asset values could not be updated!')
             };
-
+            assetValues.USD = assetValuesFromApi.USD;
+            console.log(assetValues.USD);
+            console.log(assetValues);
 
             for (let index in assetValues) {
                 if (assetValuesFromApi[index] != null) {
@@ -321,8 +323,8 @@
                         let response = await fetch('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=' + index + '&apikey=Z1EVIMF28V618X3D');
                         assetValueFromApi2 = await response.json();
                         assetValueFromApi2 = assetValueFromApi2["Global Quote"]["05. price"];
-                        console.log(assetValueFromApi2 * euroPerUsd);
-                        assetValues[index] = (assetValueFromApi2 * euroPerUsd)
+                        // console.log(assetValueFromApi2 / assetValues.USD);
+                        assetValues[index] = (assetValueFromApi2 / assetValues.USD)
                         console.log(assetValues[index]);
                     } catch (e) {
                         console.error(e);
