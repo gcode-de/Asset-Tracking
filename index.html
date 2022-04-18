@@ -17,23 +17,28 @@
             min-width: 340px;
             max-width: 1000px;
             margin: auto;
-            padding: 50px 50px;
+            padding: 5vw 5vw;
             height: fit-content;
         }
 
         .layoutElement {
             margin-top: 30px;
-            margin-bottom: 60px;
+            margin-bottom: 0px;
         }
 
         p {
             display: inline-block;
         }
 
+        h1 {
+            margin-bottom: 0px;
+        }
+
         /* assetForm */
         #assetForm {
             display: inline-block;
             width: 100%;
+            margin-bottom: 50px;
         }
 
         #assetForm-hidden {
@@ -441,7 +446,7 @@
                     <input class="mdl-textfield__input" type="text" id="assetNotesField" autocomplete="off" value="${thisAssetNotes}">
                     <label class="mdl-textfield__label" for="assetNotesField">Notes</label>
                 </div>
-                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="submit">
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" type="submit">
                     Save
                 </button>
             </form>
