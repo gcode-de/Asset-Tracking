@@ -9,129 +9,10 @@
 
     <link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css">
     <script defer src="./node_modules/material-design-lite/material.min.js"></script>
-
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <!-- <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.grey-light_blue.min.css" />
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script> -->
-
-    <style>
-        /* general styling */
-        #wrapper {
-            min-width: 340px;
-            max-width: 1000px;
-            margin: auto;
-            padding: 5vw 5vw;
-            height: fit-content;
-        }
-
-        .layoutElement {
-            margin-top: 30px;
-            margin-bottom: 0px;
-        }
-
-        p {
-            display: inline-block;
-        }
-
-        h1 {
-            margin-bottom: 0px;
-        }
-
-        /* assetForm */
-        #assetForm {
-            display: inline-block;
-            width: 100%;
-            margin-bottom: 50px;
-        }
-
-        #assetForm-hidden {
-            display: none;
-        }
-
-        #assetForm form {
-            /* display: inline-block; */
-            float: left;
-        }
-
-        #assetForm .mdl-textfield {
-            width: 150px;
-            margin-right: 20px;
-            display: inline-block;
-        }
-
-        #assetForm .mdl-button {
-            float: right;
-            /* display: inline-block; */
-        }
-
-        #error {
-            color: red;
-            width: max-content;
-        }
-
-        /* assetFilters */
-        #assetControls {
-            display: inline;
-        }
-
-        #assetFilters {
-            float: right;
-        }
-
-        /* assetList */
-        #asset-list {
-            margin-left: -10px;
-            margin-right: -10px;
-            display: block;
-            height: fit-content;
-        }
-
-        /* assetCard */
-        .demo-card-square.mdl-card {
-            width: 320px;
-            /* height: 320px; */
-            height: 240px;
-            float: left;
-            margin: 10px;
-        }
-
-        .demo-card-square>.mdl-card__title {
-            color: #fff;
-        }
-
-        .demo-card-square.Crypto>.mdl-card__title {
-            background:
-                linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)),
-                url('images/crypto.jpg') bottom right 15% no-repeat #46B6AC;
-        }
-
-        .demo-card-square.Stocks>.mdl-card__title {
-            background:
-                linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)),
-                url('images/stocks.jpg') bottom right 15% no-repeat #46B6AC;
-        }
-
-        .demo-card-square.Metals>.mdl-card__title {
-            background:
-                linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)),
-                url('images/metal.jpg') bottom right 15% no-repeat #46B6AC;
-        }
-
-        .mdl-card__title-text {
-            font-size: 30px;
-            font-weight: 600;
-        }
-
-        .footer {
-            display: block;
-            width: 100%;
-        }
-
-        #total-value {
-            font-size: 30px;
-            font-weight: 600;
-        }
-    </style>
+    <link rel="stylesheet" href="./style.css">
     <script src="./main.js"></script>
     <script src="./view.js"></script>
     <script src="./api.js"></script>
@@ -142,7 +23,7 @@
     <div id="wrapper">
         <h1>Track yo assets!</h1>
 
-        <div id="assetForm" class="layoutElement">
+        <div id="assetForm-hidden" class="layoutElement">
         </div>
 
         <div id="assetControls" class="layoutElement">
@@ -230,7 +111,7 @@
         <div id="footer">
             <p id="total-value" class="layoutElement"></p>
             <br>
-            <p class="layoutElement">This semi awesome tools does keeps track of your assets and get real time price
+            <p class="layoutElement">This awesome tools does keeps track of your assets and get real time price
                 date
                 from
                 separate APIs. Your assets are stored on local cache so they will be available when you come back!</p>

@@ -5,7 +5,8 @@ let totalValue
 //display assetForm
 function displayAssetForm(thisAssetType = '', thisAssetName = '', thisAssetQuantity = '', thisAssetNotes = '', isdirty = false) {
     console.log(isdirty);
-    document.querySelector('#assetForm').innerHTML = `
+    document.querySelector('#assetForm-hidden').innerHTML = `
+    <h2>Add/Edit asset</h2>
     <form onsubmit="addAsset(this); return false;">
         <datalist id="assetTypeList">
             <option value="Crypto">
@@ -72,15 +73,18 @@ function displayAssetForm(thisAssetType = '', thisAssetName = '', thisAssetQuant
         Cancel
     </button>
     `
+    document.querySelector('#assetForm-hidden').setAttribute('id', 'assetForm'); //hide assetForm
 }
 
 //hide assetForm and clear input fields and error message
 function hideAssetForm() {
-    document.querySelector('#assetForm').innerHTML = ''; //hide assetForm
-    // assetTypeField.value = '';
-    // assetNameField.value = '';
-    // assetQuantityField.value = '';
-    // assetNotesField.value = '';
+    // document.querySelector('#assetForm').innerHTML = ''; //hide assetForm
+
+    document.querySelector('#assetForm').setAttribute('id', 'assetForm-hidden'); //hide assetForm
+    assetTypeField.value = '';
+    assetNameField.value = '';
+    assetQuantityField.value = '';
+    assetNotesField.value = '';
 }
 
 //Prepare assetNameField dropdown and assetUnit in Form according to assetTypeField
@@ -212,7 +216,7 @@ function displayAssets(ASSETS) {
                 Notes: ${ASSETS[singleAsset].assetNotes}
             </div>
             <div class="mdl-card__actions mdl-card--border">
-                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="editAsset('${singleAsset}', '${ASSETS[singleAsset].assetName}')">
+                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" href="#assetForm" onclick="editAsset('${singleAsset}', '${ASSETS[singleAsset].assetName}')">
                     edit
                 </a>
                 <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="deleteAsset('${singleAsset}', '${ASSETS[singleAsset].assetName}')">
