@@ -1,0 +1,42 @@
+{
+    "Bitcoin": {
+        "assetType": "Crypto",
+        "assetName": "Bitcoin",
+        "assetAbb": "BTC",
+        "assetQuantity": 0.01288,
+        "assetUnit": "Piece",
+        "assetBaseValue": 30000,
+        "assetValue": 1000,
+        "assetNotes": ""
+    },
+    "Ethereum": {
+        "assetType": "Crypto",
+        "assetName": "Ethereum",
+        "assetAbb": "ETH",
+        "assetQuantity": 0.029,
+        "assetUnit": "Piece",
+        "assetBaseValue": 1000,
+        "assetValue": 1000,
+        "assetNotes": ""
+    },
+    "Silver": {
+        "assetType": "Metals",
+        "assetName": "Silver",
+        "assetAbb": "XAG",
+        "assetQuantity": 754,
+        "assetUnit": "Oz",
+        "assetBaseValue": 20,
+        "assetValue": 1000,
+        "assetNotes": ""
+    },
+    "Gold": {
+        "assetType": "Metals",
+        "assetName": "Gold",
+        "assetAbb": "XAU",
+        "assetQuantity": 2.25,
+        "assetUnit": "Oz",
+        "assetBaseValue": 1000,
+        "assetValue": 1000,
+        "assetNotes": ""
+    }
+}

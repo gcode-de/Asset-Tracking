@@ -1,10 +1,12 @@
-let DELETED_ASSET = {}
+export let DELETED_ASSET = {}
 
-let totalValue
+export function displayAssetFormEmpty() {
+    hideAssetForm();
+    displayAssetForm();
+}
 
 //display assetForm
-function displayAssetForm(thisAssetType = '', thisAssetName = '', thisAssetQuantity = '', thisAssetNotes = '', isdirty = false) {
-    console.log(isdirty);
+export function displayAssetForm(thisAssetType = '', thisAssetName = '', thisAssetQuantity = '', thisAssetNotes = '', isdirty = false) {
     document.querySelector('#assetForm-hidden').innerHTML = `
     <h2>Add/Edit asset</h2>
     <form onsubmit="addAsset(this); return false;">
@@ -65,21 +67,25 @@ function displayAssetForm(thisAssetType = '', thisAssetName = '', thisAssetQuant
             <input class="mdl-textfield__input" type="text" id="assetNotesField" autocomplete="off" value="${thisAssetNotes}">
             <label class="mdl-textfield__label" for="assetNotesField">Notes</label>
         </div>
-        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" type="submit">
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" type="submit" id="saveButton">
             Save
         </button>
     </form>
-    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="hideAssetForm()">
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="cancelButton">
         Cancel
     </button>
     `
     document.querySelector('#assetForm-hidden').setAttribute('id', 'assetForm'); //hide assetForm
+    setIsdirty();
+    document.querySelector('#cancelButton').addEventListener('click', hideAssetForm)
 }
 
 //hide assetForm and clear input fields and error message
-function hideAssetForm() {
+export function hideAssetForm() {
     // document.querySelector('#assetForm').innerHTML = ''; //hide assetForm
-
+    if (document.querySelector('#assetForm') === null) {
+        return
+    }
     document.querySelector('#assetForm').setAttribute('id', 'assetForm-hidden'); //hide assetForm
     assetTypeField.value = '';
     assetNameField.value = '';
@@ -88,7 +94,7 @@ function hideAssetForm() {
 }
 
 //Prepare assetNameField dropdown and assetUnit in Form according to assetTypeField
-function setAssetType() {
+export function setAssetType() {
     if (document.getElementById("assetTypeField").value === "") {
         displayToast('Chose asset type first!')
         return
@@ -110,8 +116,29 @@ function setAssetType() {
     }
 }
 
-//Push form input to ASSETS
-function addAsset(form) {
+export function setIsdirty() {
+    //mark filled input fields as isdirty
+    document.getElementById("assetTypeField").addEventListener("input", function () {
+        console.log('focusout');
+        this.parentNode.classList.add('is-dirty');
+    })
+    document.getElementById("assetNameField").addEventListener("input", function () {
+        console.log('focusout');
+        this.parentNode.classList.add('is-dirty');
+    })
+    document.getElementById("assetQuantityField").addEventListener("input", function () {
+        console.log('focusout');
+        this.parentNode.classList.add('is-dirty');
+    })
+    document.getElementById("assetNotesField").addEventListener("input", function () {
+        console.log('focusout');
+        this.parentNode.classList.add('is-dirty');
+    })
+
+}
+
+//Push form input to assets
+export function addAsset(form) {
     //Make sure form is filled completely
     if (form.assetTypeField.value === "") {
         displayToast('Enter asset type!')
@@ -133,50 +160,59 @@ function addAsset(form) {
     //find assetUnit for assetType
     const thisAssetQuantityUnit = assetQuantityUnits.find(assetUnit => assetUnit.name === form.assetTypeField.value).unit;
 
-    //Push asset to ASSETS
-    ASSETS[form.assetNameField.value] = { assetType: form.assetTypeField.value, assetName: form.assetNameField.value, assetAbb: "", assetQuantity: form.assetQuantityField.value, assetUnit: thisAssetQuantityUnit, assetValue: "", assetNotes: form.assetNotesField.value }
+    //Push asset to assets
+    userAssets[form.assetNameField.value] = { assetType: form.assetTypeField.value, assetName: form.assetNameField.value, assetAbb: "", assetQuantity: form.assetQuantityField.value, assetUnit: thisAssetQuantityUnit, assetValue: "", assetNotes: form.assetNotesField.value }
     displayToast('Asset saved successfully!')
     updateAssetAbbs()
     updateAssetValues()
-    totalValue = calcTotalValue(ASSETS);
-    updateLocalStorage(ASSETS);
+    userTotalValue = calcuserTotalValue(assets);
+    updateLocalStorage(userAssets);
     hideAssetForm()
-    displayAssets(ASSETS);
+    displayAssets(userAssets, assets2);
 }
 
-function deleteAsset(singleAsset, singleAssetName) {
-    if (confirm('Sure, you want to delete Asset "' + singleAssetName + '"?') === false)     // alert('löschen...');
+export function deleteAsset(singleAsset) {
+    singleAsset = document.getElementById(this.id).parentElement.parentElement.getAttribute('assetname')
+    if (confirm('Sure, you want to delete Asset "' + assets2[singleAsset] + '"?') === false)     // alert('löschen...');
         return
-    DELETED_ASSET = ASSETS[singleAsset];
-    delete ASSETS[singleAsset]
+    DELETED_ASSET = userAssets[singleAsset];
+    delete userAssets[singleAsset]
 
-    updateLocalStorage();
-    ASSETS = calculateAssetValue(ASSETS);
-    displayAssets(ASSETS);
+
+    userAssets = calculateAssetValue(userAssets);
+    displayAssets(userAssets);
     // displayToast('Asset "' + singleAssetName + '" deleted.');
     displaySnackbar(('Asset "' + singleAssetName + '" deleted.'), 'undo', undoDeleteAsset);
+    updateLocalStorage();
 }
 
-function undoDeleteAsset() {
-    ASSETS[DELETED_ASSET.value] = DELETED_ASSET
-    // ASSETS.push(deletedAsset);
+export function undoDeleteAsset() {
+    userAssets[DELETED_ASSET.value] = DELETED_ASSET
+    // assets.push(deletedAsset);
     updateLocalStorage();
-    ASSETS = calculateAssetValue(ASSETS);
-    displayAssets(ASSETS);
+    userAssets = calculateAssetValue(userAssets);
+    displayAssets(userAssets);
     displayToast('Asset "' + DELETED_ASSET.assetName + '" restored successfully.')
 }
 
-function editAsset(singleAsset) {
-    displayAssetForm(ASSETS[singleAsset].assetType, ASSETS[singleAsset].assetName, ASSETS[singleAsset].assetQuantity, ASSETS[singleAsset].assetNotes, true);
+export function editAsset() {
+    console.log('start editAsset');
+    // console.log(this.id);
+    const singleAsset = document.getElementById(this.id).parentElement.parentElement.getAttribute('assetname')
+    // console.dir(singleAsset);
+    if (!this) return
+    // console.log(assets[singleAsset]);
+    hideAssetForm();
+    displayAssetForm(assets2[singleAsset].assetType, userAssets[singleAsset].assetName, userAssets[singleAsset].assetQuantity, userAssets[singleAsset].assetNotes, true);
 
     // updateLocalStorage();
-    // calcTotalValue();
+    // calcuserTotalValue();
     // hideAssetForm()
     // displayAssets();
 }
 
 //Display Toast for wrong form inputs and other information
-function displayToast(error) {
+export function displayToast(error) {
     var notification = document.querySelector('.mdl-js-snackbar');
     notification.MaterialSnackbar.showSnackbar(
         {
@@ -186,7 +222,7 @@ function displayToast(error) {
 }
 
 //Display Snackbar for wrong form inputs and other information
-function displaySnackbar(error, buttonText, buttonFunction) {
+export function displaySnackbar(error, buttonText, buttonFunction) {
     var notification = document.querySelector('.mdl-js-snackbar');
     var data = {
         message: error,
@@ -197,33 +233,42 @@ function displaySnackbar(error, buttonText, buttonFunction) {
     notification.MaterialSnackbar.showSnackbar(data);
 }
 
-//Display Assets from ASSETS
-function displayAssets(ASSETS) {
-    console.log('Start displayAssets', ASSETS);
+//Display Assets from assets
+export function displayAssets(userAssets, assets2) {
+    console.log('Start displayAssets', userAssets, assets2);
     document.querySelector('#asset-list').innerHTML = '';
-    for (let singleAsset in ASSETS) {
-        // console.log(singleAsset, ASSETS[singleAsset])
-        // console.log(ASSETS[singleAsset].assetType)
+    for (let singleAsset in userAssets) {
+        // console.log(singleAsset, assets[singleAsset])
+        // console.log(assets[singleAsset].assetType)
+        // console.log(assets2[singleAsset].assettAbb);
 
         document.querySelector('#asset-list').innerHTML += `
-        <div class="demo-card-square mdl-card mdl-shadow--2dp ${ASSETS[singleAsset].assetType}">
+        <div class="demo-card-square mdl-card mdl-shadow--2dp ${assets2[singleAsset].assetType}" id="asset-card-${assets2[singleAsset].assetAbb}" assetname="${userAssets[singleAsset].assetName}">
             <div class="mdl-card__title mdl-card--expand">
-                <h2 class="mdl-card__title-text">${ASSETS[singleAsset].assetName} (${ASSETS[singleAsset].assetAbb})</h2>
+                <h2 class="mdl-card__title-text">${singleAsset} (${assets2[singleAsset].assetAbb})</h2>
             </div>
             <div class="mdl-card__supporting-text">
-                ${ASSETS[singleAsset].assetQuantity} ${ASSETS[singleAsset].assetUnit}<br>
-                Value: ${ASSETS[singleAsset].assetValue.toLocaleString("de-DE")}€<br>
-                Notes: ${ASSETS[singleAsset].assetNotes}
+                ${userAssets[singleAsset].assetQuantity} ${assets2[singleAsset].assetUnit}<br>
+                Value: ${userAssets[singleAsset].assetValue?.toLocaleString("de-DE")}€<br>
+                Notes: ${userAssets[singleAsset].assetNotes}
             </div>
             <div class="mdl-card__actions mdl-card--border">
-                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" href="#assetForm" onclick="editAsset('${singleAsset}', '${ASSETS[singleAsset].assetName}')">
+                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" href="#assetForm"  id="${assets2[singleAsset].assetAbb}-edit-button">
                     edit
                 </a>
-                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="deleteAsset('${singleAsset}', '${ASSETS[singleAsset].assetName}')">
+                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="${assets2[singleAsset].assetAbb}-delete-button">
                     delete
                 </a>
             </div>
         </div>
         `;
     }
+    for (let singleAsset in userAssets) {
+        // console.log(assets[singleAsset]);
+        // const delBtn = document.getElementById(assets[singleAsset].assetAbb + '-delete-button').id
+        // console.log(delBtn);
+        document.getElementById(assets2[singleAsset].assetAbb + '-delete-button').addEventListener('click', deleteAsset)
+        document.getElementById(assets2[singleAsset].assetAbb + '-edit-button').addEventListener('click', editAsset)
+    }
+
 }

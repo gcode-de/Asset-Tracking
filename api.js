@@ -1,13 +1,13 @@
-const valuesAPI2url = 'https://yfapi.net/v6/finance/quote';
-const valuesAPI2key = '?access_key=Z1EVIMF28V618X3D';
-const valuesAPI2base = '&base=EUR';
-let valuesAPI2symbols = '&symbols='; //Add assetAbbs seperated with commas
-let valuesAPI2link;
+// const valuesAPI2url = 'https://yfapi.net/v6/finance/quote';
+// const valuesAPI2key = '?access_key=Z1EVIMF28V618X3D';
+// const valuesAPI2base = '&base=EUR';
+// let valuesAPI2symbols = '&symbols='; //Add assetAbbs seperated with commas
+// let valuesAPI2link;
 
 // MXrzxkKCX04jatCdZBkaO6yYOJji3m4r2ZhUKd5e
 
 //construct Api1 Request URL
-function constructApi1URL(assetValues) {
+export function constructApi1URL(assetValues) {
 
     const valuesAPIurl = 'https://commodities-api.com/api/latest';
     const valuesAPIkey = '?access_key=6oemg05g8508q5s2rrzn2aqjv4ig7ac7t4oz04u0bukj500tq02t6jmwhits';
@@ -19,11 +19,11 @@ function constructApi1URL(assetValues) {
         valuesAPIsymbols += ',';
     }
     valuesAPIsymbols = valuesAPIsymbols.slice(0, -1);
-    valuesAPIlink = valuesAPIurl + valuesAPIkey + valuesAPIbase + valuesAPIsymbols
+    const valuesAPIlink = valuesAPIurl + valuesAPIkey + valuesAPIbase + valuesAPIsymbols
     return valuesAPIlink
 };
 
-async function updateAssetValues() {
+export async function updateAssetValues(assetValues) {
     try {
         assetValues = await getValuesFromAPI1(assetValues);
     } catch (e) {
@@ -37,18 +37,21 @@ async function updateAssetValues() {
         displayToast('Asset values could not be updated!')
     };
     console.log('After Api1+2', assetValues);
-    ASSETS = calculateAssetBaseValue(ASSETS, assetValues)
-    console.log('After calculateAssetBaseValue', ASSETS);
-    ASSETS = calculateAssetValue(ASSETS);
-    console.log('After calculateAssetValue', ASSETS);
-    totalValue = calcTotalValue(ASSETS);
+    assets = calculateAssetBaseValue(assets, assetValues)
+    console.log('After calculateAssetBaseValue', assets);
+    assets = calculateAssetValue(assets);
+    console.log('After calculateAssetValue', assets);
+    userTotalValue = calcuserTotalValue(assets);
 
-    updateLocalStorage(ASSETS);
-    displayAssets(ASSETS);
+    //update DB with assetValues
+    await setDoc(doc(db, "assets", "assetValues"), assetValues);
+    saveAssetsToDB(assets2)
+    updateLocalStorage(userAssets);
+    displayAssets(userAssets, assets2);
     displayToast('Asset values updated.');
 }
 
-async function getValuesFromAPI1(assetValues) {
+export async function getValuesFromAPI1(assetValues) {
     const valuesAPIlink = constructApi1URL(assetValues);
 
     let assetValuesFromApi = {
@@ -95,7 +98,7 @@ async function getValuesFromAPI1(assetValues) {
     return assetValues;
 }
 
-async function getValuesFromAPI2(assetValues) {
+export async function getValuesFromAPI2(assetValues) {
     console.log('Start Api2', assetValues);
     for (let index in assetValues) {
         if (assetValues[index] === 'NaN')
