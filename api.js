@@ -7,41 +7,43 @@
 // MXrzxkKCX04jatCdZBkaO6yYOJji3m4r2ZhUKd5e
 
 //construct Api1 Request URL
-export function constructApi1URL(assetValues) {
-
+export function constructApi1URL(assets2) {
+    console.log("constructApi1URL");
+    console.log(assets2);
     const valuesAPIurl = 'https://commodities-api.com/api/latest';
     const valuesAPIkey = '?access_key=6oemg05g8508q5s2rrzn2aqjv4ig7ac7t4oz04u0bukj500tq02t6jmwhits';
     const valuesAPIbase = '&base=EUR';
     let valuesAPIsymbols = '&symbols='; //Add assetAbbs seperated with commas
 
-    for (let singleAsset in assetValues) {
-        valuesAPIsymbols += singleAsset;
+    for (let singleAsset in assets2) {
+        if (assets2[singleAsset].assetAbb = undefined) { return }
+        valuesAPIsymbols += assets2[singleAsset].assetAbb;
         valuesAPIsymbols += ',';
     }
     valuesAPIsymbols = valuesAPIsymbols.slice(0, -1);
     const valuesAPIlink = valuesAPIurl + valuesAPIkey + valuesAPIbase + valuesAPIsymbols
+    console.log(valuesAPIlink);
     return valuesAPIlink
 };
 
-export async function updateAssetValues(assetValues) {
+export async function updateAssetValues(assets2) {
     try {
-        assetValues = await getValuesFromAPI1(assetValues);
+        assets2 = await getValuesFromAPI1(assets2);
     } catch (e) {
         console.error(e);
         displayToast('Asset values could not be updated!')
     };
     try {
-        assetValues = await getValuesFromAPI2(assetValues);
+        assets2 = await getValuesFromAPI2(assets2);
     } catch (e) {
         console.error(e);
         displayToast('Asset values could not be updated!')
     };
-    console.log('After Api1+2', assetValues);
-    assets = calculateAssetBaseValue(assets, assetValues)
-    console.log('After calculateAssetBaseValue', assets);
-    assets = calculateAssetValue(assets);
-    console.log('After calculateAssetValue', assets);
-    userTotalValue = calcuserTotalValue(assets);
+    console.log('After Api1+2', assets2);
+
+    assets2 = calculateAssetValue(assets2);
+    console.log('After calculateAssetValue', assets2);
+    userTotalValue = calcuserTotalValue(assets2);
 
     //update DB with assetValues
     await setDoc(doc(db, "assets", "assetValues"), assetValues);
@@ -51,8 +53,8 @@ export async function updateAssetValues(assetValues) {
     displayToast('Asset values updated.');
 }
 
-export async function getValuesFromAPI1(assetValues) {
-    const valuesAPIlink = constructApi1URL(assetValues);
+export async function getValuesFromAPI1(assets2) {
+    const valuesAPIlink = constructApi1URL(assets2);
 
     let assetValuesFromApi = {
         "ADA": 1.193330973679504,
@@ -87,34 +89,34 @@ export async function getValuesFromAPI1(assetValues) {
         console.error(e);
         displayToast('Asset values could not be updated!')
     };
-    assetValues.USD = assetValuesFromApi.USD;
+    assets2.USD.assetValue = assetValuesFromApi.USD;
     // console.log(assetValues.USD);
-    console.log('Before loop in Api1', assetValues);
-    for (let index in assetValues) {
-        assetValues[index] = (1 / assetValuesFromApi[index]).toFixed(2);
-        // console.log(index, [index]);
+    console.log('Before loop in Api1', assets2);
+    for (let asset in assets2) {
+        assets2[asset].assetValue = (1 / assetValuesFromApi[asset]).toFixed(2);
+        // console.log(asset, [asset]);
     }
-    console.log('End Api1', assetValues);
-    return assetValues;
+    console.log('End Api1', assets2);
+    return assets2;
 }
 
-export async function getValuesFromAPI2(assetValues) {
-    console.log('Start Api2', assetValues);
-    for (let index in assetValues) {
-        if (assetValues[index] === 'NaN')
+export async function getValuesFromAPI2(assets2) {
+    console.log('Start Api2', assets2);
+    for (let index in assets2) {
+        if (assets2[index].assetValue === 'NaN')
             // get assetValues from API2
             try {
-                let response = await fetch('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=' + index + '&apikey=Z1EVIMF28V618X3D');
+                let response = await fetch('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=' + assets2[index].assetAbb + '&apikey=Z1EVIMF28V618X3D');
                 let assetValueFromApi2 = await response.json();
                 assetValueFromApi2 = await assetValueFromApi2["Global Quote"]["05. price"];
                 // console.log(assetValueFromApi2 / assetValues.USD);
-                assetValues[index] = (assetValueFromApi2 / assetValues.USD)
-                console.log(assetValues[index]);
+                assets2[index].assetValue = (assetValueFromApi2 / assets2.USD.assetValue)
+                console.log(assets2[index]);
 
             } catch (e) {
                 console.error(e);
                 displayToast('Asset values could not be updated!')
             };
     }
-    return assetValues;
+    return assets2;
 }

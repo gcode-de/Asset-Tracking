@@ -158,20 +158,19 @@ export function addAsset(form) {
     }
 
     //find assetUnit for assetType
-    const thisAssetQuantityUnit = assetQuantityUnits.find(assetUnit => assetUnit.name === form.assetTypeField.value).unit;
+    // const thisAssetQuantityUnit = assetQuantityUnits.find(assetUnit => assetUnit.name === form.assetTypeField.value).unit;
 
-    //Push asset to assets
-    userAssets[form.assetNameField.value] = { assetType: form.assetTypeField.value, assetName: form.assetNameField.value, assetAbb: "", assetQuantity: form.assetQuantityField.value, assetUnit: thisAssetQuantityUnit, assetValue: "", assetNotes: form.assetNotesField.value }
-    displayToast('Asset saved successfully!')
-    updateAssetAbbs()
-    updateAssetValues()
-    userTotalValue = calcuserTotalValue(assets);
+    //Push asset to userAssets
+    userAssets[form.assetNameField.value] = { assetQuantity: form.assetQuantityField.value, assetNotes: form.assetNotesField.value }
+    displayToast('Asset saved successfully!');
+    calculateAssetValue(assets2, userAssets);
+    userTotalValue = calcuserTotalValue(userAssets);
     updateLocalStorage(userAssets);
     hideAssetForm()
-    displayAssets(userAssets, assets2);
+    displayAssets(userAssets, assets2, assetUnits);
 }
 
-export function deleteAsset(singleAsset) {
+export function deleteAsset(userAssets) {
     singleAsset = document.getElementById(this.id).parentElement.parentElement.getAttribute('assetname')
     if (confirm('Sure, you want to delete Asset "' + assets2[singleAsset] + '"?') === false)     // alert('löschen...');
         return
@@ -186,7 +185,7 @@ export function deleteAsset(singleAsset) {
     updateLocalStorage();
 }
 
-export function undoDeleteAsset() {
+export function undoDeleteAsset(userAssets, DELETED_ASSET) {
     userAssets[DELETED_ASSET.value] = DELETED_ASSET
     // assets.push(deletedAsset);
     updateLocalStorage();
@@ -195,15 +194,16 @@ export function undoDeleteAsset() {
     displayToast('Asset "' + DELETED_ASSET.assetName + '" restored successfully.')
 }
 
-export function editAsset() {
+export function editAsset(thisAsset, userAssets, assets2) {
     console.log('start editAsset');
-    // console.log(this.id);
+    console.log(thisAsset);
+    console.log(document.getElementById(this.id));
     const singleAsset = document.getElementById(this.id).parentElement.parentElement.getAttribute('assetname')
-    // console.dir(singleAsset);
+    console.dir(singleAsset);
     if (!this) return
-    // console.log(assets[singleAsset]);
+    console.log(assets2[singleAsset]);
     hideAssetForm();
-    displayAssetForm(assets2[singleAsset].assetType, userAssets[singleAsset].assetName, userAssets[singleAsset].assetQuantity, userAssets[singleAsset].assetNotes, true);
+    displayAssetForm(assets2[singleAsset].assetType, singleAsset, userAssets[singleAsset].assetQuantity, userAssets[singleAsset].assetNotes, true);
 
     // updateLocalStorage();
     // calcuserTotalValue();
@@ -234,21 +234,21 @@ export function displaySnackbar(error, buttonText, buttonFunction) {
 }
 
 //Display Assets from assets
-export function displayAssets(userAssets, assets2) {
+export function displayAssets(userAssets, assets2, assetUnits) {
     console.log('Start displayAssets', userAssets, assets2);
     document.querySelector('#asset-list').innerHTML = '';
     for (let singleAsset in userAssets) {
-        // console.log(singleAsset, assets[singleAsset])
+        // console.log(singleAsset, assets2[singleAsset])
         // console.log(assets[singleAsset].assetType)
         // console.log(assets2[singleAsset].assettAbb);
 
         document.querySelector('#asset-list').innerHTML += `
-        <div class="demo-card-square mdl-card mdl-shadow--2dp ${assets2[singleAsset].assetType}" id="asset-card-${assets2[singleAsset].assetAbb}" assetname="${userAssets[singleAsset].assetName}">
+        <div class="demo-card-square mdl-card mdl-shadow--2dp ${assets2[singleAsset].assetType}" id="asset-card-${assets2[singleAsset].assetAbb}" assetname="${singleAsset}">
             <div class="mdl-card__title mdl-card--expand">
                 <h2 class="mdl-card__title-text">${singleAsset} (${assets2[singleAsset].assetAbb})</h2>
             </div>
             <div class="mdl-card__supporting-text">
-                ${userAssets[singleAsset].assetQuantity} ${assets2[singleAsset].assetUnit}<br>
+                ${userAssets[singleAsset].assetQuantity} ${assetUnits[assets2[singleAsset].assetType]}<br>
                 Value: ${userAssets[singleAsset].assetValue?.toLocaleString("de-DE")}€<br>
                 Notes: ${userAssets[singleAsset].assetNotes}
             </div>
@@ -267,8 +267,8 @@ export function displayAssets(userAssets, assets2) {
         // console.log(assets[singleAsset]);
         // const delBtn = document.getElementById(assets[singleAsset].assetAbb + '-delete-button').id
         // console.log(delBtn);
-        document.getElementById(assets2[singleAsset].assetAbb + '-delete-button').addEventListener('click', deleteAsset)
-        document.getElementById(assets2[singleAsset].assetAbb + '-edit-button').addEventListener('click', editAsset)
+        document.getElementById(assets2[singleAsset].assetAbb + '-delete-button').addEventListener('click', deleteAsset.bind(singleAsset, userAssets))
+        document.getElementById(assets2[singleAsset].assetAbb + '-edit-button').addEventListener('click', editAsset.bind(singleAsset, userAssets, assets2))
     }
 
 }
