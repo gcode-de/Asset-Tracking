@@ -15,7 +15,7 @@ import {
   displayAssets,
 } from "./view.js";
 // import { getAssetUnitsFromDB, getAssetsFromDB, saveAssetsToDB } from "./db.js";
-import "./node_modules/material-design-lite/material.min.css";
+// import "./node_modules/material-design-lite/material.min.css";
 
 //bind buttons to functions
 document.querySelector("#addAssetButton").addEventListener("click", displayAssetFormEmpty);
