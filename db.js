@@ -1,13 +1,6 @@
 import { initializeApp } from "firebase/app";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  getDoc,
-  doc,
-  setDoc,
-} from "firebase/firestore";
-import firebaseConfig from "./.env";
+import { getFirestore, collection, getDocs, getDoc, doc, setDoc } from "firebase/firestore";
+// import firebaseConfig from "./.env";
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);

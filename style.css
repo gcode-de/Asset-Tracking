@@ -89,26 +89,20 @@ h2 {
   margin: 10px;
 }
 
-.demo-card-square>.mdl-card__title {
+.demo-card-square > .mdl-card__title {
   color: #fff;
 }
 
-.demo-card-square.Crypto>.mdl-card__title {
-  background:
-    linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)),
-    url('images/crypto.jpg') bottom right 15% no-repeat #46B6AC;
+.demo-card-square.crypto > .mdl-card__title {
+  background: linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)), url("images/crypto.jpg") bottom right 15% no-repeat #46b6ac;
 }
 
-.demo-card-square.Stocks>.mdl-card__title {
-  background:
-    linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)),
-    url('images/stocks.jpg') bottom right 15% no-repeat #46B6AC;
+.demo-card-square.stocks > .mdl-card__title {
+  background: linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)), url("images/stocks.jpg") bottom right 15% no-repeat #46b6ac;
 }
 
-.demo-card-square.Metals>.mdl-card__title {
-  background:
-    linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)),
-    url('images/metal.jpg') bottom right 15% no-repeat #46B6AC;
+.demo-card-square.metals > .mdl-card__title {
+  background: linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)), url("images/metal.jpg") bottom right 15% no-repeat #46b6ac;
 }
 
 .mdl-card__title-text {
