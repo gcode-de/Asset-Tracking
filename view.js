@@ -1,4 +1,4 @@
-import { userAssets, assetUnits, updateLocalStorage } from "./main";
+import { userAssets, assetUnits, updateLocalStorage } from "./main.js";
 
 export let DELETED_ASSET = {};
 
