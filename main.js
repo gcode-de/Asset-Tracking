@@ -28,10 +28,10 @@ document.querySelector("#updateValuesButton").addEventListener("click", () => {
 export let totalValue = null;
 
 export let userAssets = [
-  { id: 0, name: "Bitcoin", quantity: 0.01288, notes: "", type: "crypto", abb: "btc", value: 10_000, baseValue: 40_000 },
-  { id: 1, name: "Ethereum", quantity: 0.029, notes: "", type: "crypto", abb: "eth", value: 10_000, baseValue: 4_000 },
-  { id: 2, name: "Silver", quantity: 754, notes: "", type: "metals", abb: "silver", value: 10_000, baseValue: 22 },
-  { id: 3, name: "Gold", quantity: 3.5, notes: "recently bought", type: "metals", abb: "gold", value: 10_000, baseValue: 1_600 },
+  { id: 0, name: "Bitcoin", quantity: 0.01288, notes: "", type: "crypto", abb: "btc", value: 10_000, baseValue: 40_000, isDeleted: false },
+  { id: 1, name: "Ethereum", quantity: 0.029, notes: "", type: "crypto", abb: "eth", value: 10_000, baseValue: 4_000, isDeleted: false },
+  { id: 2, name: "Silver", quantity: 754, notes: "", type: "metals", abb: "silver", value: 10_000, baseValue: 20.7, isDeleted: false },
+  { id: 3, name: "Gold", quantity: 3.5, notes: "recently bought", type: "metals", abb: "gold", value: 10_000, baseValue: 1_900, isDeleted: false },
 ];
 
 export const assetUnits = {
@@ -88,7 +88,7 @@ export async function updateLocalStorage() {
   if (userAssets == null || userAssets == "undefined") {
     console.log("Found no userAssets to update to Local Storage.");
     return;
-  } else {
-    await localStorage.setItem("userAssets", JSON.stringify(userAssets));
   }
+
+  await localStorage.setItem("userAssets", JSON.stringify(userAssets));
 }

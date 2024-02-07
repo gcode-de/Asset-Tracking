@@ -12,7 +12,7 @@ html {
 }
 
 .layoutElement {
-  margin-top: 30px;
+  margin-top: 20px;
   margin-bottom: 0px;
 }
 
@@ -65,11 +65,16 @@ h2 {
 
 /* assetFilters */
 #assetControls {
-  display: inline;
+  display: flex;
+  flex-flow: row wrap;
+  gap: 20px;
+  justify-content: space-between;
+  padding: 10px 0;
+  margin-top: 0;
 }
 
 #assetFilters {
-  float: right;
+  /* float: right; */
 }
 
 /* assetList */
@@ -110,12 +115,12 @@ h2 {
   font-weight: 600;
 }
 
-.footer {
-  display: block;
-  width: 100%;
-}
-
 #total-value {
   font-size: 30px;
   font-weight: 600;
+}
+
+.footer {
+  display: block;
+  width: 100%;
 }

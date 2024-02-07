@@ -177,22 +177,23 @@ export function addAsset(form) {
 export function deleteAsset(id) {
   const asset = userAssets[id];
   if (confirm('Sure, you want to delete Asset "' + asset.name + '"?') === false) return;
-  DELETED_ASSET = { ...asset };
   const assetIndex = userAssets.findIndex((asset) => asset.id === id);
   if (assetIndex !== -1) {
-    userAssets.splice(assetIndex, 1);
+    userAssets[assetIndex].isDeleted = true;
   }
 
+  updateLocalStorage();
   displayAssets();
   displaySnackbar('Asset "' + asset.name + '" deleted.', "undo", () => {
-    undoDeleteAsset(DELETED_ASSET);
+    undoDeleteAsset(id);
   });
-  updateLocalStorage();
 }
 
-export function undoDeleteAsset(DELETED_ASSET) {
-  console.log(DELETED_ASSET);
-  userAssets.push(DELETED_ASSET);
+export function undoDeleteAsset(id) {
+  const assetIndex = userAssets.findIndex((asset) => asset.id === id);
+  if (assetIndex !== -1) {
+    userAssets[assetIndex].isDeleted = false;
+  }
   // assets.push(deletedAsset);
   updateLocalStorage();
   //   userAssets = calculateAssetValue(userAssets);
@@ -228,7 +229,7 @@ export function displaySnackbar(error, buttonText, buttonFunction) {
       buttonFunction();
     },
     actionText: buttonText,
-    timeout: 10000,
+    timeout: 5000,
   };
   notification.MaterialSnackbar.showSnackbar(data);
 }
@@ -236,8 +237,13 @@ export function displaySnackbar(error, buttonText, buttonFunction) {
 export function displayAssets() {
   document.querySelector("#asset-list").innerHTML = "";
   //To do: vorm Anzeigen sortieren?
-  userAssets.forEach(({ id, name, quantity, notes, type, abb, value, baseValue }) => {
-    document.querySelector("#asset-list").innerHTML += `
+  userAssets
+    .filter((asset) => !asset.isDeleted)
+    .sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    })
+    .forEach(({ id, name, quantity, notes, type, abb, value, baseValue }) => {
+      document.querySelector("#asset-list").innerHTML += `
         <div class="demo-card-square mdl-card mdl-shadow--2dp ${type}" id="${id}" assetname="${name}">
             <div class="mdl-card__title mdl-card--expand">
                 <h2 class="mdl-card__title-text">${name} (${abb})</h2>
@@ -257,17 +263,19 @@ export function displayAssets() {
             </div>
         </div>
         `;
-  });
+    });
 
-  userAssets.forEach((asset) => {
-    // console.log(assets[singleAsset]);
-    // const delBtn = document.getElementById(assets[singleAsset].assetAbb + '-delete-button').id
-    // console.log(delBtn);
-    document.getElementById(asset.id + "-delete-button").addEventListener("click", (event) => {
-      deleteAsset(asset.id);
+  userAssets
+    .filter((asset) => !asset.isDeleted)
+    .forEach((asset) => {
+      // console.log(assets[singleAsset]);
+      // const delBtn = document.getElementById(assets[singleAsset].assetAbb + '-delete-button').id
+      // console.log(delBtn);
+      document.getElementById(asset.id + "-delete-button").addEventListener("click", (event) => {
+        deleteAsset(asset.id);
+      });
+      document.getElementById(asset.id + "-edit-button").addEventListener("click", (event) => {
+        editAsset(asset.id);
+      });
     });
-    document.getElementById(asset.id + "-edit-button").addEventListener("click", (event) => {
-      editAsset(asset.id);
-    });
-  });
 }
