@@ -1,4 +1,4 @@
-import { userAssets } from "./main";
+import { userAssets } from "./main.js";
 
 export const assetFormContainer = document.querySelector(".assetFormContainer");
 export const assetForm = document.querySelector("#form");
