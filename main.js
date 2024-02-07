@@ -1,24 +1,10 @@
 // import { constructApi1URL, updateAssetValues, getValuesFromAPI1 } from "./api.js";
-import {
-  DELETED_ASSET,
-  displayAssetForm,
-  displayAssetFormEmpty,
-  hideAssetForm,
-  setAssetType,
-  setIsdirty,
-  addAsset,
-  deleteAsset,
-  undoDeleteAsset,
-  editAsset,
-  displayToast,
-  displaySnackbar,
-  displayAssets,
-} from "./view.js";
+import { deleteAsset, undoDeleteAsset, displayToast, displaySnackbar, displayAssets } from "./view.js";
+import { displayAssetForm, populateAssetForm, hideAssetForm, setAssetType, handleFormSubmit } from "./Form.js";
 // import { getAssetUnitsFromDB, getAssetsFromDB, saveAssetsToDB } from "./db.js";
 // import "./node_modules/material-design-lite/material.min.css";
 
 //bind buttons to functions
-document.querySelector("#addAssetButton").addEventListener("click", displayAssetFormEmpty);
 document.querySelector("#updateValuesButton").addEventListener("click", () => {
   updateAssetValues(userAssets);
 });
