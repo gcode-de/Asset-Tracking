@@ -16,6 +16,7 @@ document.querySelector("#form").addEventListener("submit", (event) => {
 document.querySelector("#cancelButton").addEventListener("click", hideAssetForm);
 
 export function displayAssetForm(id = null) {
+  assetFormContainer.scrollIntoView({ behavior: "smooth" });
   assetFormContainer.classList.remove("hidden");
   assetForm__nameField.addEventListener("click", setAssetType);
 

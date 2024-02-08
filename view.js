@@ -120,14 +120,14 @@ export function displayAssets() {
       const actions = document.createElement("div");
       actions.className = "mdl-card__actions mdl-card--border";
 
-      const editButton = document.createElement("a");
+      const editButton = document.createElement("button");
       editButton.className = "mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect";
       editButton.href = "#assetForm";
       editButton.id = `${asset.id}-edit-button`;
       editButton.textContent = "edit";
       editButton.addEventListener("click", () => displayAssetForm(asset.id));
 
-      const deleteButton = document.createElement("a");
+      const deleteButton = document.createElement("button");
       deleteButton.className = "mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect";
       deleteButton.id = `${asset.id}-delete-button`;
       deleteButton.textContent = "delete";
