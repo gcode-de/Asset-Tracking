@@ -132,7 +132,7 @@ export function displayAssets() {
       deleteButton.id = `${asset.id}-delete-button`;
       deleteButton.textContent = "delete";
       deleteButton.addEventListener("click", () => deleteAsset(asset.id));
-      deleteButton.addEventListener("touchstart", () => deleteAsset(asset.id));
+      deleteButton.addEventListener("touchend", () => deleteAsset(asset.id));
 
       actions.appendChild(editButton);
       actions.appendChild(deleteButton);
