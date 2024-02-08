@@ -32,6 +32,7 @@ export function displayAssetForm(id = null) {
     assetForm__notesField.dispatchEvent(new Event("input", { bubbles: true }));
     assetForm__idField.value = asset.id;
     assetForm__idField.dispatchEvent(new Event("input", { bubbles: true }));
+    setAssetType();
   }
 }
 
