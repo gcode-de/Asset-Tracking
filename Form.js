@@ -16,8 +16,8 @@ document.querySelector("#form").addEventListener("submit", (event) => {
 document.querySelector("#cancelButton").addEventListener("click", hideAssetForm);
 
 export function displayAssetForm(id = null) {
-  assetFormContainer.scrollIntoView({ behavior: "smooth" });
   assetFormContainer.classList.remove("hidden");
+  assetFormContainer.scrollIntoView({ behavior: "smooth" });
   assetForm__nameField.addEventListener("click", setAssetType);
 
   if (typeof id === "number") {
@@ -44,7 +44,6 @@ export function hideAssetForm() {
 
 //Prepare assetNameField dropdown and assetUnit in Form according to assetTypeField
 export function setAssetType() {
-  console.log("test");
   if (assetForm__typeField.value === "") {
     displayToast("Chose asset type first!");
     return;
