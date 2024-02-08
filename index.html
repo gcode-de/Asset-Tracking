@@ -18,7 +18,7 @@
 
   <body>
     <div id="wrapper">
-      <h1>Track yo assets!</h1>
+      <h1>Track your assets!</h1>
 
       <div class="assetFormContainer layoutElement hidden">
         <h2>Add/Edit asset</h2>
@@ -61,24 +61,37 @@
           </select> -->
 
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" list="assetTypeField" id="assetTypeField" autocomplete="off" />
             <label class="mdl-textfield__label" for="assetTypeField">Type</label>
+            <select class="mdl-textfield__input" id="assetTypeField" autocomplete="off" name="type" required>
+              <option value="" disabled selected></option>
+              <option value="" disabled>Choose asset type</option>
+              <option value="crypto">Crypto</option>
+              <option value="crypto">Precious Metal</option>
+              <option value="stocks">Stock</option>
+            </select>
           </div>
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" id="assetNameField" autocomplete="off" />
             <label class="mdl-textfield__label" for="assetNameField">Asset</label>
+            <input class="mdl-textfield__input" type="text" id="assetNameField" autocomplete="off" name="name" required />
           </div>
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="assetQuantityField" autocomplete="off" />
             <label class="mdl-textfield__label" for="assetQuantityField" id="assetQuantityLabel">Quantity</label>
+            <input
+              class="mdl-textfield__input"
+              type="text"
+              pattern="-?[0-9]*(\.[0-9]+)?"
+              id="assetQuantityField"
+              autocomplete="off"
+              name="quantity"
+            />
             <span class="mdl-textfield__error">Input is not a number!</span>
             <span id="assetUnitField"></span>
           </div>
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" id="assetNotesField" autocomplete="off" />
             <label class="mdl-textfield__label" for="assetNotesField">Notes</label>
+            <input class="mdl-textfield__input" type="text" id="assetNotesField" autocomplete="off" name="notes" />
           </div>
-          <input type="text" id="assetIdField" hidden />
+          <input type="text" id="assetIdField" name="id" hidden />
           <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" type="submit" id="saveButton">Save</button>
         </form>
         <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="cancelButton">Cancel</button>

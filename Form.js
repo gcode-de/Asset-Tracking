@@ -1,4 +1,5 @@
-import { userAssets } from "./main.js";
+import { userAssets, updateView } from "./main.js";
+import { displayToast } from "./view.js";
 
 export const assetFormContainer = document.querySelector(".assetFormContainer");
 export const assetForm = document.querySelector("#form");
@@ -16,35 +17,37 @@ document.querySelector("#cancelButton").addEventListener("click", hideAssetForm)
 
 export function displayAssetForm(id = null) {
   assetFormContainer.classList.remove("hidden");
+  assetForm__nameField.addEventListener("click", setAssetType);
+
   if (typeof id === "number") {
     const asset = userAssets.find((asset) => asset.id === id);
-    console.log(asset);
     assetForm__typeField.value = asset.type;
+    assetForm__typeField.dispatchEvent(new Event("input", { bubbles: true }));
     assetForm__nameField.value = asset.name;
+    assetForm__nameField.dispatchEvent(new Event("input", { bubbles: true }));
     assetForm__quantityField.value = asset.quantity;
+    assetForm__quantityField.dispatchEvent(new Event("input", { bubbles: true }));
     assetForm__notesField.value = asset.notes;
+    assetForm__notesField.dispatchEvent(new Event("input", { bubbles: true }));
     assetForm__idField.value = asset.id;
+    assetForm__idField.dispatchEvent(new Event("input", { bubbles: true }));
   }
 }
 
-export function populateAssetForm(asset) {
-  assetFormContainer.classList.remove("hidden");
-  //populate
-}
-
-//hide assetForm and clear input fields
 export function hideAssetForm() {
   assetFormContainer.classList.toggle("hidden");
+  assetForm__nameField.removeEventListener("input", setAssetType);
   assetForm.reset();
 }
 
 //Prepare assetNameField dropdown and assetUnit in Form according to assetTypeField
 export function setAssetType() {
-  if (document.getElementById("assetTypeField").value === "") {
+  console.log("test");
+  if (assetForm__typeField.value === "") {
     displayToast("Chose asset type first!");
     return;
   }
-  const assetType = document.getElementById("assetTypeField").value;
+  const assetType = assetForm__typeField.value;
   switch (assetType) {
     case "stocks":
       document.querySelector("#assetNameField").setAttribute("list", "Stocks");
@@ -61,36 +64,29 @@ export function setAssetType() {
   }
 }
 
-// export function setIsdirty() {
-//   //mark filled input fields as isdirty
-//   document.getElementById("assetTypeField").addEventListener("input", function () {
-//     console.log("focusout");
-//     this.parentNode.classList.add("is-dirty");
-//   });
-//   document.getElementById("assetNameField").addEventListener("input", function () {
-//     console.log("focusout");
-//     this.parentNode.classList.add("is-dirty");
-//   });
-//   document.getElementById("assetQuantityField").addEventListener("input", function () {
-//     console.log("focusout");
-//     this.parentNode.classList.add("is-dirty");
-//   });
-//   document.getElementById("assetNotesField").addEventListener("input", function () {
-//     console.log("focusout");
-//     this.parentNode.classList.add("is-dirty");
-//   });
-// }
-
 export function handleFormSubmit(event) {
   event.preventDefault();
-  //   const newAsset = { id };
-  console.log(
-    assetForm__typeField.value,
-    assetForm__nameField.value,
-    assetForm__quantityField.value,
-    assetForm__notesField.value,
-    assetForm__idField.value
-  );
-  //   event.target.reset();
-  //   event.target.elements.name.focus();
+  const formData = new FormData(event.target);
+  const formProps = Object.fromEntries(formData);
+
+  console.log(formProps);
+  if (formProps.id) {
+    const assetIndex = userAssets.findIndex((asset) => asset.id === Number(formProps.id));
+    console.log(assetIndex, userAssets[assetIndex]);
+    userAssets[assetIndex] = { ...userAssets[assetIndex], quantity: formProps.quantity, notes: formProps.notes };
+    displayToast('Asset "' + userAssets[assetIndex].name + '" was updated.');
+  } else {
+    const newAsset = {
+      ...formProps,
+      value: 0,
+      baseValue: 0,
+      isDeleted: false,
+      id: userAssets.length,
+      abb: "", // TO DO
+    };
+    userAssets.push(newAsset);
+    displayToast('Asset "' + newAsset.name + '" was created.');
+  }
+  updateView();
+  hideAssetForm();
 }

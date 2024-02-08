@@ -1,4 +1,4 @@
-import { userAssets, assetUnits, updateLocalStorage, calcTotalValue } from "./main.js";
+import { userAssets, assetUnits, updateView } from "./main.js";
 import { displayAssetForm, hideAssetForm, handleFormSubmit } from "./Form.js";
 
 //Push form input to assets
@@ -45,9 +45,7 @@ export function deleteAsset(id) {
     userAssets[assetIndex].isDeleted = true;
   }
 
-  updateLocalStorage();
-  displayAssets();
-  calcTotalValue();
+  updateView();
   displaySnackbar('Asset "' + asset.name + '" deleted.', "undo", () => {
     undoDeleteAsset(id);
   });
@@ -59,10 +57,7 @@ export function undoDeleteAsset(id) {
     userAssets[assetIndex].isDeleted = false;
   }
   // assets.push(deletedAsset);
-  updateLocalStorage();
-  //   userAssets = calculateAssetValue(userAssets);
-  displayAssets();
-  calcTotalValue();
+  updateView();
   displayToast('Asset "' + userAssets[assetIndex].name + '" restored successfully.');
 }
 
@@ -94,7 +89,7 @@ export function displaySnackbar(error, buttonText, buttonFunction) {
       buttonFunction();
     },
     actionText: buttonText,
-    timeout: 5000,
+    timeout: 4000,
   };
   notification.MaterialSnackbar.showSnackbar(data);
 }

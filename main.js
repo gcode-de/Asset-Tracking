@@ -1,13 +1,12 @@
 // import { constructApi1URL, updateAssetValues, getValuesFromAPI1 } from "./api.js";
 import { deleteAsset, undoDeleteAsset, displayToast, displaySnackbar, displayAssets } from "./view.js";
-import { displayAssetForm, populateAssetForm, hideAssetForm, setAssetType, handleFormSubmit } from "./Form.js";
+import { displayAssetForm, hideAssetForm, setAssetType, handleFormSubmit } from "./Form.js";
 // import { getAssetUnitsFromDB, getAssetsFromDB, saveAssetsToDB } from "./db.js";
-// import "./node_modules/material-design-lite/material.min.css";
 
 //bind buttons to functions
-document.querySelector("#updateValuesButton").addEventListener("click", () => {
-  updateAssetValues(userAssets);
-});
+// document.querySelector("#updateValuesButton").addEventListener("click", () => {
+//   updateAssetValues(userAssets);
+// });
 
 //TO DO:  MVC, Dependency Injection, Clean Code - Uncle Bob
 
@@ -27,30 +26,23 @@ export const assetUnits = {
 };
 
 //SETUP
-window.addEventListener("load", async function () {
-  //Load userAssets from localstorage if available
-  //   userAssets = getUserAssetsFromLocalStorage();
+// window.addEventListener("load", async function () {});
 
-  //Get assets2 from db
-  // assets2 = await getAssetsFromDB();
-
-  //   userAssets = calculateAssetValue(assets2, userAssets);
+// userAssets = getUserAssetsFromLocalStorage();
+export function updateView() {
   calculateAssetValue();
   calcTotalValue();
   displayAssets(userAssets, assetUnits);
   updateLocalStorage(userAssets);
-  // saveAbbsToDB(assetCodes);
-  // saveUnitsToDB(assetQuantityUnits2);
-  // getUnitsFromDB()
-  // console.log(assetQuantityUnits);
-  // constructApi1URL(assets2);
-});
+}
 
-function calculateAssetValue() {
-  userAssets.forEach((asset) => {
+updateView();
+
+async function calculateAssetValue() {
+  console.log(userAssets);
+  await userAssets.forEach((asset) => {
     asset.value = asset.baseValue * asset.quantity;
   });
-  return userAssets;
 }
 
 export function calcTotalValue() {
@@ -75,6 +67,5 @@ export async function updateLocalStorage() {
     console.log("Found no userAssets to update to Local Storage.");
     return;
   }
-
   await localStorage.setItem("userAssets", JSON.stringify(userAssets));
 }
