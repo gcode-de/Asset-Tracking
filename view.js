@@ -1,4 +1,4 @@
-import { userAssets, assetUnits, updateLocalStorage } from "./main.js";
+import { userAssets, assetUnits, updateLocalStorage, calcTotalValue } from "./main.js";
 import { displayAssetForm, hideAssetForm, handleFormSubmit } from "./Form.js";
 
 //Push form input to assets
@@ -47,6 +47,7 @@ export function deleteAsset(id) {
 
   updateLocalStorage();
   displayAssets();
+  calcTotalValue();
   displaySnackbar('Asset "' + asset.name + '" deleted.', "undo", () => {
     undoDeleteAsset(id);
   });
@@ -61,7 +62,8 @@ export function undoDeleteAsset(id) {
   updateLocalStorage();
   //   userAssets = calculateAssetValue(userAssets);
   displayAssets();
-  displayToast('Asset "' + DELETED_ASSET.name + '" restored successfully.');
+  calcTotalValue();
+  displayToast('Asset "' + userAssets[assetIndex].name + '" restored successfully.');
 }
 
 // export function editAsset(id) {

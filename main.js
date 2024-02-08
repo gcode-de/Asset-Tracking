@@ -53,8 +53,8 @@ function calculateAssetValue() {
   return userAssets;
 }
 
-function calcTotalValue() {
-  let totalValue = userAssets.reduce((acc, asset) => acc + asset.value, 0);
+export function calcTotalValue() {
+  let totalValue = userAssets.filter((asset) => !asset.isDeleted).reduce((acc, asset) => acc + asset.value, 0);
   document.querySelector("#total-value").innerHTML = `Total Worth ${totalValue.toLocaleString("de-DE")} €`;
 }
 
