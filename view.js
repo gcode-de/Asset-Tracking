@@ -125,12 +125,14 @@ export function displayAssets() {
       editButton.id = `${asset.id}-edit-button`;
       editButton.textContent = "edit";
       editButton.addEventListener("click", () => displayAssetForm(asset.id));
+      editButton.addEventListener("touchend", () => displayAssetForm(asset.id));
 
       const deleteButton = document.createElement("button");
       deleteButton.className = "mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect";
       deleteButton.id = `${asset.id}-delete-button`;
       deleteButton.textContent = "delete";
       deleteButton.addEventListener("click", () => deleteAsset(asset.id));
+      deleteButton.addEventListener("touchstart", () => deleteAsset(asset.id));
 
       actions.appendChild(editButton);
       actions.appendChild(deleteButton);
