@@ -122,7 +122,6 @@ export function displayAssets() {
 
       const editButton = document.createElement("button");
       editButton.className = "mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect";
-      editButton.href = "#assetForm";
       editButton.id = `${asset.id}-edit-button`;
       editButton.textContent = "edit";
       editButton.addEventListener("click", () => displayAssetForm(asset.id));
