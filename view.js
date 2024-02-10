@@ -1,42 +1,6 @@
 import { userAssets, assetUnits, updateView } from "./main.js";
 import { displayAssetForm, hideAssetForm, handleFormSubmit } from "./Form.js";
 
-//Push form input to assets
-// export function addAsset(form) {
-//   //Make sure form is filled completely
-//   if (form.assetTypeField.value === "") {
-//     displayToast("Enter asset type!");
-//     return;
-//   }
-//   if (form.assetNameField.value === "") {
-//     displayToast("Enter asset name!");
-//     return;
-//   }
-//   if (form.assetTypeField.value === "") {
-//     displayToast("Chose asset type!");
-//     return;
-//   }
-//   if (form.assetQuantityField.value === "") {
-//     displayToast("Enter asset quantity!");
-//     return;
-//   }
-
-//find assetUnit for assetType
-// const thisAssetQuantityUnit = assetQuantityUnits.find(assetUnit => assetUnit.name === form.assetTypeField.value).unit;
-
-//Push asset to userAssets
-//   userAssets[form.assetNameField.value] = {
-//     assetQuantity: form.assetQuantityField.value,
-//     assetNotes: form.assetNotesField.value,
-//   };
-//   displayToast("Asset saved successfully!");
-//   calculateAssetValue(assets2, userAssets);
-//   userTotalValue = calcuserTotalValue(userAssets);
-//   updateLocalStorage(userAssets);
-//   hideAssetForm();
-//   displayAssets(userAssets, assets2, assetUnits);
-// }
-
 export function deleteAsset(id) {
   const asset = userAssets[id];
   if (confirm('Sure, you want to delete Asset "' + asset.name + '"?') === false) return;
@@ -60,17 +24,6 @@ export function undoDeleteAsset(id) {
   updateView();
   displayToast('Asset "' + userAssets[assetIndex].name + '" restored successfully.');
 }
-
-// export function editAsset(id) {
-//   const { name, type, quantity, notes } = userAssets.find((asset) => asset.id === id);
-//   hideAssetForm();
-//   displayAssetForm(id);
-
-//   // updateLocalStorage();
-//   // calcuserTotalValue();
-//   // hideAssetForm()
-//   // displayAssets();
-// }
 
 //Display Toast for wrong form inputs and other information
 export function displayToast(error) {

@@ -3,10 +3,14 @@ import { deleteAsset, undoDeleteAsset, displayToast, displaySnackbar, displayAss
 import { displayAssetForm, hideAssetForm, setAssetType, handleFormSubmit } from "./Form.js";
 // import { getAssetUnitsFromDB, getAssetsFromDB, saveAssetsToDB } from "./db.js";
 
-//bind buttons to functions
-// document.querySelector("#updateValuesButton").addEventListener("click", () => {
-//   updateAssetValues(userAssets);
-// });
+// bind buttons to functions
+document.querySelector("#updateValuesButton").addEventListener("click", () => {
+  updateAssetValues();
+});
+function updateAssetValues() {
+  console.log("Einen Scheiß werde ich updaten! :-D");
+  displayToast("This function has yet to be implemented!");
+}
 
 //TO DO:  MVC, Dependency Injection, Clean Code - Uncle Bob
 
@@ -26,17 +30,16 @@ export const assetUnits = {
 };
 
 //SETUP
-// window.addEventListener("load", async function () {});
+window.addEventListener("load", async function () {
+  getUserAssetsFromLocalStorage();
+});
 
-// userAssets = getUserAssetsFromLocalStorage();
 export function updateView() {
   calculateAssetValue();
   calcTotalValue();
   displayAssets(userAssets, assetUnits);
   updateLocalStorage(userAssets);
 }
-
-updateView();
 
 async function calculateAssetValue() {
   console.log(userAssets);
@@ -58,7 +61,7 @@ async function getUserAssetsFromLocalStorage() {
   }
   userAssets = JSON.parse(localStorage.getItem("userAssets"));
   console.log("got userAssets from Local Storage.", userAssets);
-  return userAssets;
+  updateView();
 }
 
 export async function updateLocalStorage() {
