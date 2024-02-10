@@ -17,6 +17,10 @@ document.querySelector("#cancelButton").addEventListener("click", hideAssetForm)
 
 export function displayAssetForm(id = null) {
   assetFormContainer.classList.remove("hidden");
+  assetForm__typeField.parentElement.classList.remove("is-dirty", "is-upgraded");
+  assetForm__nameField.parentElement.classList.remove("is-dirty", "is-upgraded");
+  assetForm__quantityField.parentElement.classList.remove("is-dirty", "is-upgraded");
+  assetForm__notesField.parentElement.classList.remove("is-dirty", "is-upgraded");
   assetFormContainer.scrollIntoView({ behavior: "smooth" });
   assetForm__nameField.addEventListener("click", setAssetType);
 
