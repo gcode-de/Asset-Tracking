@@ -62,7 +62,7 @@ export function displayAssets() {
 
       card.innerHTML = `
           <div class="mdl-card__title mdl-card--expand">
-            <h2 class="mdl-card__title-text">${asset.name} (${asset.abb})</h2>
+            <h2 class="mdl-card__title-text">${asset.name}</h2>
           </div>
           <div class="mdl-card__supporting-text">
             ${asset.quantity} ${assetUnits[asset.type]}<br>
