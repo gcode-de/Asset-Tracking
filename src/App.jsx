@@ -68,7 +68,8 @@ export default function App() {
     const formData = new FormData(event.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.id) {
-      const assetToUpdate = userAssets.find((asset) => asset.id === Number(formProps.id));
+      //handle asset edits
+      // const assetToUpdate = userAssets.find((asset) => asset.id === Number(formProps.id));
       setUserAssets((prevUserAssets) =>
         prevUserAssets.map((asset) =>
           asset.id === Number(formProps.id) ? { ...asset, quantity: formProps.quantity, notes: formProps.notes } : asset
@@ -76,6 +77,7 @@ export default function App() {
       );
       // displayToast('Asset "' + assetToUpdate.name + '" was updated.');
     } else {
+      //handle asset creation
       const newAsset = {
         ...formProps,
         value: 0,
@@ -87,7 +89,20 @@ export default function App() {
       setUserAssets([...userAssets, newAsset]);
       displayToast('Asset "' + newAsset.name + '" was created.');
     }
+    resetForm();
+  }
+
+  function resetForm() {
     setCurrentAssetId(null);
+    const assetForm__typeField = document.querySelector("#assetTypeField");
+    const assetForm__nameField = document.querySelector("#assetNameField");
+    const assetForm__quantityField = document.querySelector("#assetQuantityField");
+    const assetForm__notesField = document.querySelector("#assetNotesField");
+
+    assetForm__typeField.parentElement.classList.remove("is-dirty", "is-upgraded");
+    assetForm__nameField.parentElement.classList.remove("is-dirty", "is-upgraded");
+    assetForm__quantityField.parentElement.classList.remove("is-dirty", "is-upgraded");
+    assetForm__notesField.parentElement.classList.remove("is-dirty", "is-upgraded");
     setFormIsVisible(false);
   }
 
@@ -106,12 +121,17 @@ export default function App() {
   function handleEditAsset(id) {
     setCurrentAssetId(id);
     setFormIsVisible(true);
-  }
+    const assetForm__typeField = document.querySelector("#assetTypeField");
+    const assetForm__nameField = document.querySelector("#assetNameField");
+    const assetForm__quantityField = document.querySelector("#assetQuantityField");
+    const assetForm__notesField = document.querySelector("#assetNotesField");
 
-  // function updateAssetValues() {
-  //   console.log("Einen Scheiß werde ich updaten! :-D");
-  //   displayToast("This function has yet to be implemented!");
-  // }
+    assetForm__typeField.parentElement.classList.add("is-dirty", "is-upgraded");
+    assetForm__nameField.parentElement.classList.add("is-dirty", "is-upgraded");
+    assetForm__quantityField.parentElement.classList.add("is-dirty", "is-upgraded");
+    assetForm__notesField.parentElement.classList.add("is-dirty", "is-upgraded");
+    document.querySelector(".assetFormContainer").scrollIntoView({ behavior: "smooth" });
+  }
 
   function displayToast(error) {
     var notification = document.querySelector(".mdl-js-snackbar");
@@ -143,6 +163,7 @@ export default function App() {
           defaultData={currentAsset}
           setCurrentAssetId={setCurrentAssetId}
           onFormSubmit={handleFormSubmit}
+          resetForm={resetForm}
         />
         <div id="assetControls" className="layoutElement">
           <AssetControls setFormIsVisible={setFormIsVisible} handleUpdateValues={fetchValuesFromApi} setCurrentAssetId={setCurrentAssetId} />

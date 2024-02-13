@@ -1,8 +1,7 @@
 import PropTypes from "prop-types";
 
 import "./Form.css";
-export default function Form({ setFormIsVisible, formIsVisible, defaultData, setCurrentAssetId, onFormSubmit }) {
-  // const assetFormContainer = document.querySelector(".assetFormContainer");
+export default function Form({ setFormIsVisible, formIsVisible, defaultData, setCurrentAssetId, onFormSubmit, resetForm }) {
   // const assetForm = document.querySelector("#form");
   // const assetForm__typeField = document.querySelector("#assetTypeField");
   // const assetForm__nameField = document.querySelector("#assetNameField");
@@ -13,7 +12,6 @@ export default function Form({ setFormIsVisible, formIsVisible, defaultData, set
   // assetForm__nameField.parentElement.classList.remove("is-dirty", "is-upgraded");
   // assetForm__quantityField.parentElement.classList.remove("is-dirty", "is-upgraded");
   // assetForm__notesField.parentElement.classList.remove("is-dirty", "is-upgraded");
-  // assetFormContainer.scrollIntoView({ behavior: "smooth" });
 
   return (
     <div className={`assetFormContainer layoutElement ${formIsVisible || "hidden"}`}>
@@ -114,7 +112,7 @@ export default function Form({ setFormIsVisible, formIsVisible, defaultData, set
           />
         </div>
         <input type="text" id="assetIdField" name="id" hidden defaultValue={defaultData?.id} />
-        <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" type="submit" id="saveButton">
+        <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" id="saveButton">
           Save
         </button>
       </form>
@@ -122,8 +120,7 @@ export default function Form({ setFormIsVisible, formIsVisible, defaultData, set
         className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
         id="cancelButton"
         onClick={() => {
-          setFormIsVisible(false);
-          setCurrentAssetId(null);
+          resetForm();
         }}
       >
         Cancel
@@ -136,6 +133,7 @@ Form.propTypes = {
   formIsVisible: PropTypes.bool.isRequired,
   setFormIsVisible: PropTypes.func.isRequired,
   setCurrentAssetId: PropTypes.func.isRequired,
+  resetForm: PropTypes.func.isRequired,
   onFormSubmit: PropTypes.func.isRequired,
   defaultData: PropTypes.object,
 };
