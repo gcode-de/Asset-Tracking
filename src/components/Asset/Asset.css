@@ -1,0 +1,38 @@
+/* assetCard */
+.demo-card-square.mdl-card {
+  width: 320px;
+  /* height: 320px; */
+  height: 240px;
+  float: left;
+  margin: 10px;
+}
+
+.demo-card-square > .mdl-card__title {
+  color: #fff;
+}
+
+.demo-card-square.crypto > .mdl-card__title {
+  background: linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)), url("../../assets/crypto.jpg") bottom right 15% no-repeat #46b6ac;
+}
+
+.demo-card-square.stocks > .mdl-card__title {
+  background: linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)), url("../../assets/stocks.jpg") bottom right 15% no-repeat #46b6ac;
+}
+
+.demo-card-square.metals > .mdl-card__title {
+  background: linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)), url("../../assets/metal.jpg") bottom right 15% no-repeat #46b6ac;
+}
+
+.demo-card-square.cash > .mdl-card__title {
+  background: linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)), url("../../assets/cash.jpg") bottom right 15% no-repeat #46b6ac;
+}
+
+.demo-card-square.real_estate > .mdl-card__title {
+  background: linear-gradient(0deg, rgba(90, 90, 90, 0.5), rgba(90, 90, 90, 0.5)),
+    url("../../assets/real_estate.jpg") bottom right 15% no-repeat #46b6ac;
+}
+
+.mdl-card__title-text {
+  font-size: 30px;
+  font-weight: 600;
+}
