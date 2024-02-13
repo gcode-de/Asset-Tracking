@@ -161,7 +161,7 @@ export default function App() {
           ))}
         </div>
         <Footer>
-          <TotalValue userAssets={visibleUserAssets} />
+          <TotalValue visibleUserAssets={visibleUserAssets} />
         </Footer>
         <SnackBar />
       </div>
