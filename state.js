@@ -34,7 +34,11 @@ export const useAssetStore = create((set) => ({
   handleUnDeleteAsset: (assetId) => {
     set((state) => ({ userAssets: state.userAssets.map((asset) => (asset.id === assetId ? { ...asset, isDeleted: false } : asset)) }));
   },
-  handleAddAsset: () => {},
+  handleAddAsset: (newAsset) => {
+    set((state) => ({
+      userAssets: [...state.userAssets, newAsset],
+    }));
+  },
   handleEditAsset: () => {},
 }));
 

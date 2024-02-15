@@ -7,18 +7,21 @@ import SnackBar from "./components/SnackBar";
 import Footer from "./components/Footer";
 import { useEffect } from "react";
 import TotalValue from "./components/TotalValue";
-import { useAssetStore, useFormStore, useVisibleUserAssets, useCurrentAsset } from "../state.js";
+import { useAssetStore, useFormStore, useVisibleUserAssets } from "../state.js";
 
 export default function App() {
   const toggleFormIsVisible = useFormStore((state) => state.toggleFormIsVisible);
   const setCurrentAssetId = useFormStore((state) => state.setCurrentAssetId);
   const userAssets = useAssetStore((state) => state.userAssets);
+  const currentAssetId = useFormStore((state) => state.currentAssetId);
   const deleteAsset = useAssetStore((state) => state.handleDeleteAsset);
   const unDeleteAsset = useAssetStore((state) => state.handleUnDeleteAsset);
+  const addAsset = useAssetStore((state) => state.handleAddAsset);
+  const editAsset = useAssetStore((state) => state.handleEditAsset);
 
-  useEffect(() => {
-    console.log(userAssets);
-  }, [userAssets]);
+  // useEffect(() => {
+  //   console.log(userAssets);
+  // }, [userAssets]);
 
   async function fetchValuesFromApi() {
     // const url = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=AAPL&apikey=Z1EVIMF28V618X3D";
@@ -39,14 +42,11 @@ export default function App() {
     event.preventDefault();
     const formData = new FormData(event.target);
     const formProps = Object.fromEntries(formData);
+    console.log(formProps);
     if (formProps.id) {
       //handle asset edits
-      // const assetToUpdate = userAssets.find((asset) => asset.id === Number(formProps.id));
-      // setUserAssets((prevUserAssets) =>
-      //   prevUserAssets.map((asset) =>
-      //     asset.id === Number(formProps.id) ? { ...asset, quantity: formProps.quantity, notes: formProps.notes } : asset
-      //   )
-      // );
+      const assetToUpdate = userAssets.find((asset) => asset.id === Number(formProps.id));
+      editAsset(assetToUpdate, { quantity: formProps.quantity, notes: formProps.notes });
       // displayToast('Asset "' + assetToUpdate.name + '" was updated.');
     } else {
       //handle asset creation
@@ -58,7 +58,7 @@ export default function App() {
         id: userAssets.length,
         abb: "", // TO DO
       };
-      // setUserAssets([...userAssets, newAsset]);
+      addAsset(newAsset);
       displayToast(`Asset ${newAsset.name} was created.`);
     }
     resetForm();
@@ -93,6 +93,7 @@ export default function App() {
   }
 
   function handleEditAsset(id) {
+    console.log(currentAssetId);
     setCurrentAssetId(id);
     toggleFormIsVisible();
     const assetForm__typeField = document.querySelector("#assetTypeField");

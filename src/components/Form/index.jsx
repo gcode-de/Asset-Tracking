@@ -5,16 +5,7 @@ import "./Form.css";
 export default function Form({ onFormSubmit, resetForm }) {
   const formIsVisible = useFormStore((state) => state.formIsVisible);
 
-  // const assetForm = document.querySelector("#form");
-  // const assetForm__typeField = document.querySelector("#assetTypeField");
-  // const assetForm__nameField = document.querySelector("#assetNameField");
-  // const assetForm__quantityField = document.querySelector("#assetQuantityField");
-  // const assetForm__notesField = document.querySelector("#assetNotesField");
-
-  // assetForm__typeField.parentElement.classList.remove("is-dirty", "is-upgraded");
-  // assetForm__nameField.parentElement.classList.remove("is-dirty", "is-upgraded");
-  // assetForm__quantityField.parentElement.classList.remove("is-dirty", "is-upgraded");
-  // assetForm__notesField.parentElement.classList.remove("is-dirty", "is-upgraded");
+  // console.log(currentAssetId, useCurrentAsset());
 
   return (
     <div className={`assetFormContainer layoutElement ${formIsVisible || "hidden"}`}>
