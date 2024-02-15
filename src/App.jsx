@@ -5,44 +5,16 @@ import Filters from "./components/Filters";
 import Form from "./components/Form";
 import SnackBar from "./components/SnackBar";
 import Footer from "./components/Footer";
-import { useState, useEffect } from "react";
-import useLocalStorageState from "use-local-storage-state";
+import { useEffect } from "react";
 import TotalValue from "./components/TotalValue";
+import { useAssetStore, useFormStore, useVisibleUserAssets, useCurrentAsset } from "../state.js";
 
 export default function App() {
-  const [userAssets, setUserAssets] = useLocalStorageState("userAssets", {
-    defaultValue: [
-      { id: 0, name: "Bitcoin", quantity: 0.01288, notes: "", type: "crypto", abb: "btc", value: 10_000, baseValue: 40_000, isDeleted: false },
-      { id: 1, name: "Ethereum", quantity: 0.029, notes: "", type: "crypto", abb: "eth", value: 10_000, baseValue: 4_000, isDeleted: false },
-      { id: 2, name: "Silver", quantity: 754, notes: "", type: "metals", abb: "silver", value: 10_000, baseValue: 20.7, isDeleted: false },
-      {
-        id: 3,
-        name: "Gold",
-        quantity: 3.5,
-        notes: "recently bought",
-        type: "metals",
-        abb: "gold",
-        value: 10_000,
-        baseValue: 1_900,
-        isDeleted: false,
-      },
-      { id: 4, name: "Euro", quantity: 200, notes: "under the Pillow", type: "cash", abb: "eur", value: 200, baseValue: 1, isDeleted: false },
-      { id: 5, name: "Beach house", quantity: 1, notes: "I wish", type: "real_estate", abb: "RE", value: 1, baseValue: 1, isDeleted: false },
-    ],
-  });
-  const visibleUserAssets = userAssets.filter((asset) => !asset.isDeleted);
-
-  const assetUnits = {
-    stocks: "Piece/s",
-    metals: "Oz",
-    crypto: "Piece/s",
-    real_estate: "Piece/s",
-    cash: "Piece/s",
-  };
-
-  const [formIsVisible, setFormIsVisible] = useState(false);
-  const [currentAssetId, setCurrentAssetId] = useState(null);
-  const currentAsset = userAssets.find((asset) => asset.id === currentAssetId);
+  const toggleFormIsVisible = useFormStore((state) => state.toggleFormIsVisible);
+  const setCurrentAssetId = useFormStore((state) => state.setCurrentAssetId);
+  const userAssets = useAssetStore((state) => state.userAssets);
+  const deleteAsset = useAssetStore((state) => state.handleDeleteAsset);
+  const unDeleteAsset = useAssetStore((state) => state.handleUnDeleteAsset);
 
   useEffect(() => {
     console.log(userAssets);
@@ -70,11 +42,11 @@ export default function App() {
     if (formProps.id) {
       //handle asset edits
       // const assetToUpdate = userAssets.find((asset) => asset.id === Number(formProps.id));
-      setUserAssets((prevUserAssets) =>
-        prevUserAssets.map((asset) =>
-          asset.id === Number(formProps.id) ? { ...asset, quantity: formProps.quantity, notes: formProps.notes } : asset
-        )
-      );
+      // setUserAssets((prevUserAssets) =>
+      //   prevUserAssets.map((asset) =>
+      //     asset.id === Number(formProps.id) ? { ...asset, quantity: formProps.quantity, notes: formProps.notes } : asset
+      //   )
+      // );
       // displayToast('Asset "' + assetToUpdate.name + '" was updated.');
     } else {
       //handle asset creation
@@ -86,8 +58,8 @@ export default function App() {
         id: userAssets.length,
         abb: "", // TO DO
       };
-      setUserAssets([...userAssets, newAsset]);
-      displayToast('Asset "' + newAsset.name + '" was created.');
+      // setUserAssets([...userAssets, newAsset]);
+      displayToast(`Asset ${newAsset.name} was created.`);
     }
     resetForm();
   }
@@ -103,24 +75,26 @@ export default function App() {
     assetForm__nameField.parentElement.classList.remove("is-dirty", "is-upgraded");
     assetForm__quantityField.parentElement.classList.remove("is-dirty", "is-upgraded");
     assetForm__notesField.parentElement.classList.remove("is-dirty", "is-upgraded");
-    setFormIsVisible(false);
+    toggleFormIsVisible();
   }
 
   function handleDeleteAsset(id) {
-    setUserAssets((prevUserAssets) => prevUserAssets.map((asset) => (asset.id === id ? { ...asset, isDeleted: true } : asset)));
-    displaySnackbar('"' + userAssets.find((asset) => asset.id === id).name + '" was deleted.', "undo", () => {
+    deleteAsset(id);
+    // setUserAssets((prevUserAssets) => prevUserAssets.map((asset) => (asset.id === id ? { ...asset, isDeleted: true } : asset)));
+    displaySnackbar(` was deleted.`, "undo", () => {
       handleUnDeleteAsset(id);
     });
   }
 
   function handleUnDeleteAsset(id) {
-    setUserAssets((prevUserAssets) => prevUserAssets.map((asset) => (asset.id === id ? { ...asset, isDeleted: false } : asset)));
-    displayToast('"' + userAssets.find((asset) => asset.id === id).name + '" was restored successfully.');
+    unDeleteAsset(id);
+    // setUserAssets((prevUserAssets) => prevUserAssets.map((asset) => (asset.id === id ? { ...asset, isDeleted: false } : asset)));
+    displayToast(` was restored successfully.`);
   }
 
   function handleEditAsset(id) {
     setCurrentAssetId(id);
-    setFormIsVisible(true);
+    toggleFormIsVisible();
     const assetForm__typeField = document.querySelector("#assetTypeField");
     const assetForm__nameField = document.querySelector("#assetNameField");
     const assetForm__quantityField = document.querySelector("#assetQuantityField");
@@ -157,25 +131,18 @@ export default function App() {
     <>
       <div id="wrapper">
         <h1>Track your assets!</h1>
-        <Form formIsVisible={formIsVisible} defaultData={currentAsset} onFormSubmit={handleFormSubmit} resetForm={resetForm} />
+        <Form onFormSubmit={handleFormSubmit} resetForm={resetForm} />
         <div id="assetControls" className="layoutElement">
-          <AssetControls setFormIsVisible={setFormIsVisible} handleUpdateValues={fetchValuesFromApi} setCurrentAssetId={setCurrentAssetId} />
+          <AssetControls handleUpdateValues={fetchValuesFromApi} />
           <Filters />
         </div>
         <div id="asset-list" className="layoutElement">
-          {visibleUserAssets.map((asset) => (
-            <Asset
-              key={asset.id}
-              asset={asset}
-              handleDeleteAsset={handleDeleteAsset}
-              handleEditAsset={handleEditAsset}
-              assetUnits={assetUnits}
-              setFormIsVisible={setFormIsVisible}
-            />
+          {useVisibleUserAssets().map((asset) => (
+            <Asset key={asset.id} asset={asset} handleDeleteAsset={handleDeleteAsset} handleEditAsset={handleEditAsset} />
           ))}
         </div>
         <Footer>
-          <TotalValue visibleUserAssets={visibleUserAssets} />
+          <TotalValue />
         </Footer>
         <SnackBar />
       </div>

@@ -1,6 +1,10 @@
 import PropTypes from "prop-types";
+import { useFormStore } from "../../../state";
 
-export default function AssetControls({ setFormIsVisible, handleUpdateValues, setCurrentAssetId }) {
+export default function AssetControls({ handleUpdateValues }) {
+  const toggleFormIsVisible = useFormStore((state) => state.toggleFormIsVisible);
+  const setCurrentAssetId = useFormStore((state) => state.setCurrentAssetId);
+
   return (
     <>
       <div className="buttons">
@@ -8,7 +12,7 @@ export default function AssetControls({ setFormIsVisible, handleUpdateValues, se
           className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
           id="addAssetButton"
           onClick={() => {
-            setFormIsVisible(true);
+            toggleFormIsVisible();
             setCurrentAssetId(null);
           }}
         >
@@ -23,7 +27,5 @@ export default function AssetControls({ setFormIsVisible, handleUpdateValues, se
 }
 
 AssetControls.propTypes = {
-  setFormIsVisible: PropTypes.func.isRequired,
   handleUpdateValues: PropTypes.func.isRequired,
-  setCurrentAssetId: PropTypes.func.isRequired,
 };

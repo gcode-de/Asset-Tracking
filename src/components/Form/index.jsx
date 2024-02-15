@@ -1,7 +1,10 @@
 import PropTypes from "prop-types";
-
+import { useFormStore, useCurrentAsset } from "../../../state";
 import "./Form.css";
-export default function Form({ formIsVisible, defaultData, onFormSubmit, resetForm }) {
+
+export default function Form({ onFormSubmit, resetForm }) {
+  const formIsVisible = useFormStore((state) => state.formIsVisible);
+
   // const assetForm = document.querySelector("#form");
   // const assetForm__typeField = document.querySelector("#assetTypeField");
   // const assetForm__nameField = document.querySelector("#assetNameField");
@@ -58,7 +61,7 @@ export default function Form({ formIsVisible, defaultData, onFormSubmit, resetFo
           <label className="mdl-textfield__label" htmlFor="assetTypeField">
             Type
           </label>
-          <select className="mdl-textfield__input" id="assetTypeField" autoComplete="off" name="type" required value={defaultData?.type}>
+          <select className="mdl-textfield__input" id="assetTypeField" autoComplete="off" name="type" required value={useCurrentAsset()?.type}>
             <option value=""></option>
             {/* <option value="">Choose asset type:</option> */}
             <option value="crypto">Crypto</option>
@@ -79,7 +82,7 @@ export default function Form({ formIsVisible, defaultData, onFormSubmit, resetFo
             autoComplete="off"
             name="name"
             required
-            defaultValue={defaultData?.name}
+            defaultValue={useCurrentAsset()?.name}
           />
         </div>
         <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
@@ -93,7 +96,7 @@ export default function Form({ formIsVisible, defaultData, onFormSubmit, resetFo
             id="assetQuantityField"
             autoComplete="off"
             name="quantity"
-            defaultValue={defaultData?.quantity}
+            defaultValue={useCurrentAsset()?.quantity}
           />
           <span className="mdl-textfield__error">Input is not a number!</span>
           <span id="assetUnitField"></span>
@@ -108,10 +111,10 @@ export default function Form({ formIsVisible, defaultData, onFormSubmit, resetFo
             id="assetNotesField"
             autoComplete="off"
             name="notes"
-            defaultValue={defaultData?.notes}
+            defaultValue={useCurrentAsset()?.notes}
           />
         </div>
-        <input type="text" id="assetIdField" name="id" hidden defaultValue={defaultData?.id} />
+        <input type="text" id="assetIdField" name="id" hidden defaultValue={useCurrentAsset()?.id} />
         <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" id="saveButton">
           Save
         </button>
@@ -130,8 +133,6 @@ export default function Form({ formIsVisible, defaultData, onFormSubmit, resetFo
 }
 
 Form.propTypes = {
-  formIsVisible: PropTypes.bool.isRequired,
   resetForm: PropTypes.func.isRequired,
   onFormSubmit: PropTypes.func.isRequired,
-  defaultData: PropTypes.object,
 };

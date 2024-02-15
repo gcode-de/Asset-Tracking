@@ -1,6 +1,8 @@
 import "./Asset.css";
 import PropTypes from "prop-types";
-export default function Asset({ asset, handleEditAsset, handleDeleteAsset, assetUnits }) {
+import { useAssetStore } from "../../../state.js";
+export default function Asset({ asset, handleEditAsset, handleDeleteAsset }) {
+  const assetUnits = useAssetStore((state) => state.assetUnits);
   return (
     <div className={`demo-card-square mdl-card mdl-shadow--2dp ${asset.type}`} id={asset.id}>
       <div className="mdl-card__title mdl-card--expand">
@@ -38,5 +40,4 @@ Asset.propTypes = {
   asset: PropTypes.object.isRequired,
   handleEditAsset: PropTypes.func.isRequired,
   handleDeleteAsset: PropTypes.func.isRequired,
-  assetUnits: PropTypes.object.isRequired,
 };
