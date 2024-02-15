@@ -157,14 +157,7 @@ export default function App() {
     <>
       <div id="wrapper">
         <h1>Track your assets!</h1>
-        <Form
-          formIsVisible={formIsVisible}
-          setFormIsVisible={setFormIsVisible}
-          defaultData={currentAsset}
-          setCurrentAssetId={setCurrentAssetId}
-          onFormSubmit={handleFormSubmit}
-          resetForm={resetForm}
-        />
+        <Form formIsVisible={formIsVisible} defaultData={currentAsset} onFormSubmit={handleFormSubmit} resetForm={resetForm} />
         <div id="assetControls" className="layoutElement">
           <AssetControls setFormIsVisible={setFormIsVisible} handleUpdateValues={fetchValuesFromApi} setCurrentAssetId={setCurrentAssetId} />
           <Filters />

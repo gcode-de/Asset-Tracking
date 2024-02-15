@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 
 import "./Form.css";
-export default function Form({ setFormIsVisible, formIsVisible, defaultData, setCurrentAssetId, onFormSubmit, resetForm }) {
+export default function Form({ formIsVisible, defaultData, onFormSubmit, resetForm }) {
   // const assetForm = document.querySelector("#form");
   // const assetForm__typeField = document.querySelector("#assetTypeField");
   // const assetForm__nameField = document.querySelector("#assetNameField");
@@ -131,8 +131,6 @@ export default function Form({ setFormIsVisible, formIsVisible, defaultData, set
 
 Form.propTypes = {
   formIsVisible: PropTypes.bool.isRequired,
-  setFormIsVisible: PropTypes.func.isRequired,
-  setCurrentAssetId: PropTypes.func.isRequired,
   resetForm: PropTypes.func.isRequired,
   onFormSubmit: PropTypes.func.isRequired,
   defaultData: PropTypes.object,
