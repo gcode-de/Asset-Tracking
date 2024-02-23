@@ -4,7 +4,7 @@ import { useAssetStore } from "../../../state.js";
 export default function Asset({ asset, handleEditAsset, handleDeleteAsset }) {
   const assetUnits = useAssetStore((state) => state.assetUnits);
   return (
-    <div className={`demo-card-square mdl-card mdl-shadow--2dp ${asset.type}`} id={asset.id}>
+    <div className={`demo-card-square mdl-card mdl-shadow--2dp ${asset.type}`} id={asset._id}>
       <div className="mdl-card__title mdl-card--expand">
         <h2 className="mdl-card__title-text">{asset.name}</h2>
       </div>
@@ -20,14 +20,14 @@ export default function Asset({ asset, handleEditAsset, handleDeleteAsset }) {
           className="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
           id={`${asset.id}-edit-button`}
           //   onClick={() => displayAssetForm(asset.id)}
-          onClick={() => handleEditAsset(asset.id)}
+          onClick={() => handleEditAsset(asset._id)}
         >
           edit
         </button>
         <button
           className="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
           id={`${asset.id}-delete-button`}
-          onClick={() => handleDeleteAsset(asset.id)}
+          onClick={() => handleDeleteAsset(asset._id)}
         >
           delete
         </button>

@@ -21,6 +21,8 @@ export default function Form({ onFormSubmit, resetForm }) {
     setSelectedType(event.target.value);
   };
 
+  console.log(currentAsset);
+
   return (
     <div className={`assetFormContainer layoutElement ${formIsVisible || "hidden"}`}>
       <h2>{useCurrentAsset()?.id ? "Edit asset" : "Add asset"}</h2>
@@ -126,7 +128,7 @@ export default function Form({ onFormSubmit, resetForm }) {
             defaultValue={useCurrentAsset()?.notes}
           />
         </div>
-        <input type="text" id="assetIdField" name="id" hidden defaultValue={useCurrentAsset()?.id} />
+        <input type="text" id="assetIdField" name="id" hidden defaultValue={useCurrentAsset()?._id} />
         <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" id="saveButton">
           Save
         </button>

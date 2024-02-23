@@ -81,6 +81,8 @@ export const useFormStore = create((set) => ({
 
 export const useCurrentAsset = () => {
   const currentAssetId = useFormStore((state) => state.currentAssetId);
+  console.log(currentAssetId);
+  //klappt nicht, da von MongoDB andere IDs kommen.
   const userAssets = useAssetStore((state) => state.userAssets);
 
   const currentAsset = userAssets.find((asset) => asset.id === currentAssetId);
