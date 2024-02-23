@@ -4,7 +4,7 @@ This app keeps track of your assets (stocks, crypto, precious metals) and gets r
 Your assets are stored on local cache so they will be available when you come back!
 
 To-Do:
--  refactor form
+- rebuild with nextJS
 - re-enable and refactor API fetching with .env file
 - set up database connection
 - set up user login (maybe sometime...)
