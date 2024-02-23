@@ -1,0 +1,72 @@
+/* general styling */
+html {
+  scroll-behavior: smooth;
+}
+
+#wrapper {
+  min-width: 340px;
+  max-width: 1000px;
+  margin: auto;
+  padding: 5vw 5vw;
+  height: fit-content;
+}
+
+.layoutElement {
+  margin-top: 20px;
+  margin-bottom: 0px;
+}
+
+p {
+  display: inline-block;
+}
+
+h1 {
+  margin-bottom: 0px;
+}
+
+@media only screen and (max-width: 600px) {
+  h1 {
+    font-size: 40px;
+    margin-bottom: 10px;
+  }
+}
+
+h2 {
+  font-size: x-large;
+}
+
+/* assetFilters */
+#assetControls {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 20px;
+  justify-content: space-between;
+  padding: 10px 0;
+  margin-top: 0;
+  & #assetFilters {
+    display: flex;
+    gap: 5px;
+  }
+  & .buttons {
+    display: flex;
+    gap: 5px;
+  }
+}
+
+/* assetList */
+#asset-list {
+  margin-left: -10px;
+  margin-right: -10px;
+  /* height: fit-content; */
+}
+
+#total-value {
+  font-size: 30px;
+  font-weight: 600;
+  width: 100%;
+}
+
+.footer {
+  display: block;
+  width: 100%;
+}
