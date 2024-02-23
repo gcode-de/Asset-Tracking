@@ -5,15 +5,14 @@ import Filters from "./components/Filters";
 import Form from "./components/Form";
 import SnackBar from "./components/SnackBar";
 import Footer from "./components/Footer";
-import { useEffect } from "react";
 import TotalValue from "./components/TotalValue";
 import { useAssetStore, useFormStore, useVisibleUserAssets } from "../state.js";
 
 export default function App() {
-  const toggleFormIsVisible = useFormStore((state) => state.toggleFormIsVisible);
+  const setFormIsVisible = useFormStore((state) => state.setFormIsVisible);
   const setCurrentAssetId = useFormStore((state) => state.setCurrentAssetId);
   const userAssets = useAssetStore((state) => state.userAssets);
-  const currentAssetId = useFormStore((state) => state.currentAssetId);
+  // const currentAssetId = useFormStore((state) => state.currentAssetId);
   const deleteAsset = useAssetStore((state) => state.handleDeleteAsset);
   const unDeleteAsset = useAssetStore((state) => state.handleUnDeleteAsset);
   const addAsset = useAssetStore((state) => state.handleAddAsset);
@@ -42,12 +41,11 @@ export default function App() {
     event.preventDefault();
     const formData = new FormData(event.target);
     const formProps = Object.fromEntries(formData);
-    console.log(formProps);
     if (formProps.id) {
       //handle asset edits
       const assetToUpdate = userAssets.find((asset) => asset.id === Number(formProps.id));
-      editAsset(assetToUpdate, { quantity: formProps.quantity, notes: formProps.notes });
-      // displayToast('Asset "' + assetToUpdate.name + '" was updated.');
+      editAsset(Number(formProps.id), { quantity: formProps.quantity, notes: formProps.notes });
+      displayToast(`"${assetToUpdate.name}" was updated.`);
     } else {
       //handle asset creation
       const newAsset = {
@@ -75,13 +73,14 @@ export default function App() {
     assetForm__nameField.parentElement.classList.remove("is-dirty", "is-upgraded");
     assetForm__quantityField.parentElement.classList.remove("is-dirty", "is-upgraded");
     assetForm__notesField.parentElement.classList.remove("is-dirty", "is-upgraded");
-    toggleFormIsVisible();
+    setFormIsVisible(false);
   }
 
   function handleDeleteAsset(id) {
     deleteAsset(id);
     // setUserAssets((prevUserAssets) => prevUserAssets.map((asset) => (asset.id === id ? { ...asset, isDeleted: true } : asset)));
-    displaySnackbar(` was deleted.`, "undo", () => {
+    const assetName = userAssets.find((asset) => asset.id === id).name;
+    displaySnackbar(`"${assetName}" was deleted.`, "undo", () => {
       handleUnDeleteAsset(id);
     });
   }
@@ -89,13 +88,15 @@ export default function App() {
   function handleUnDeleteAsset(id) {
     unDeleteAsset(id);
     // setUserAssets((prevUserAssets) => prevUserAssets.map((asset) => (asset.id === id ? { ...asset, isDeleted: false } : asset)));
-    displayToast(` was restored successfully.`);
+    const assetName = userAssets.find((asset) => asset.id === id).name;
+    displayToast(`"${assetName}" was restored successfully.`);
   }
 
   function handleEditAsset(id) {
-    console.log(currentAssetId);
     setCurrentAssetId(id);
-    toggleFormIsVisible();
+    setFormIsVisible(true);
+
+    //Handle Form Styling
     const assetForm__typeField = document.querySelector("#assetTypeField");
     const assetForm__nameField = document.querySelector("#assetNameField");
     const assetForm__quantityField = document.querySelector("#assetQuantityField");
@@ -105,7 +106,12 @@ export default function App() {
     assetForm__nameField.parentElement.classList.add("is-dirty", "is-upgraded");
     assetForm__quantityField.parentElement.classList.add("is-dirty", "is-upgraded");
     assetForm__notesField.parentElement.classList.add("is-dirty", "is-upgraded");
-    document.querySelector(".assetFormContainer").scrollIntoView({ behavior: "smooth" });
+
+    setTimeout(() => {
+      //wait for form to render
+      const assetFormContainer = document.querySelector(".assetFormContainer");
+      assetFormContainer.scrollIntoView({ behavior: "smooth" });
+    }, 0);
   }
 
   function displayToast(error) {

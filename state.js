@@ -39,7 +39,20 @@ export const useAssetStore = create((set) => ({
       userAssets: [...state.userAssets, newAsset],
     }));
   },
-  handleEditAsset: () => {},
+  handleEditAsset: (assetId, updates) => {
+    set((state) => {
+      const updatedUserAssets = state.userAssets.map((asset) => {
+        if (asset.id === assetId) {
+          return {
+            ...asset,
+            ...updates,
+          };
+        }
+        return asset;
+      });
+      return { userAssets: updatedUserAssets };
+    });
+  },
 }));
 
 export const useVisibleUserAssets = () => {
@@ -57,17 +70,19 @@ export const useTotalValue = () => {
 
 export const useFormStore = create((set) => ({
   formIsVisible: false,
-  toggleFormIsVisible: () => {
-    set((state) => ({ formIsVisible: !state.formIsVisible }));
+  setFormIsVisible: (isVisible) => {
+    set(() => ({ formIsVisible: isVisible }));
   },
-  currentAssetID: null,
+  currentAssetId: null,
   setCurrentAssetId: (assetId) => {
-    set(() => ({ currentAssetID: assetId }));
+    set({ currentAssetId: assetId });
   },
 }));
 
 export const useCurrentAsset = () => {
-  const currentAssetID = useAssetStore((state) => state.currentAssetID);
-  const currentAsset = useAssetStore((state) => state.userAssets.find((asset) => asset.id === currentAssetID));
+  const currentAssetId = useFormStore((state) => state.currentAssetId);
+  const userAssets = useAssetStore((state) => state.userAssets);
+
+  const currentAsset = userAssets.find((asset) => asset.id === currentAssetId);
   return currentAsset;
 };

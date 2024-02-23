@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useFormStore } from "../../../state";
 
 export default function AssetControls({ handleUpdateValues }) {
-  const toggleFormIsVisible = useFormStore((state) => state.toggleFormIsVisible);
+  const setFormIsVisible = useFormStore((state) => state.setFormIsVisible);
   const setCurrentAssetId = useFormStore((state) => state.setCurrentAssetId);
 
   return (
@@ -12,7 +12,7 @@ export default function AssetControls({ handleUpdateValues }) {
           className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
           id="addAssetButton"
           onClick={() => {
-            toggleFormIsVisible();
+            setFormIsVisible(true);
             setCurrentAssetId(null);
           }}
         >

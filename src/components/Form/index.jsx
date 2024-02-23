@@ -1,15 +1,28 @@
 import PropTypes from "prop-types";
 import { useFormStore, useCurrentAsset } from "../../../state";
 import "./Form.css";
+import { useState, useEffect } from "react";
 
 export default function Form({ onFormSubmit, resetForm }) {
+  const currentAsset = useCurrentAsset();
+  const [selectedType, setSelectedType] = useState("");
   const formIsVisible = useFormStore((state) => state.formIsVisible);
 
-  // console.log(currentAssetId, useCurrentAsset());
+  useEffect(() => {
+    if (currentAsset && currentAsset.type) {
+      setSelectedType(currentAsset.type);
+    } else {
+      setSelectedType("");
+    }
+  }, [currentAsset, formIsVisible]);
+
+  const handleChange = (event) => {
+    setSelectedType(event.target.value);
+  };
 
   return (
     <div className={`assetFormContainer layoutElement ${formIsVisible || "hidden"}`}>
-      <h2>Add/Edit asset</h2>
+      <h2>{useCurrentAsset()?.id ? "Edit asset" : "Add asset"}</h2>
       <form id="form" onSubmit={onFormSubmit}>
         {/* <select id="assetTypeList">
             <option value="Crypto" />
@@ -52,9 +65,16 @@ export default function Form({ onFormSubmit, resetForm }) {
           <label className="mdl-textfield__label" htmlFor="assetTypeField">
             Type
           </label>
-          <select className="mdl-textfield__input" id="assetTypeField" autoComplete="off" name="type" required value={useCurrentAsset()?.type}>
+          <select
+            className="mdl-textfield__input"
+            id="assetTypeField"
+            autoComplete="off"
+            name="type"
+            required
+            value={selectedType}
+            onChange={handleChange}
+          >
             <option value=""></option>
-            {/* <option value="">Choose asset type:</option> */}
             <option value="crypto">Crypto</option>
             <option value="metals">Precious Metal</option>
             <option value="stocks">Stock</option>
