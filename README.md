@@ -5,7 +5,8 @@ Your assets are stored on local cache so they will be available when you come ba
 
 To-Do:
 
-- rebuild with nextJS
-- re-enable and refactor API fetching with .env file
-- set up database connection
+- refactor to use styled components?
+- re-implement API fetching
+- include search function for stock symbols
 - set up user login (maybe sometime...)
+- set up database connection
