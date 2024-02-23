@@ -1,4 +1,4 @@
-import "./Asset.css";
+// import styles from "./Asset.module.css";
 import PropTypes from "prop-types";
 import { useAssetStore } from "../../../state.js";
 export default function Asset({ asset, handleEditAsset, handleDeleteAsset }) {

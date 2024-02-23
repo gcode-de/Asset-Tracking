@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { useFormStore, useCurrentAsset } from "../../../state";
-import "./Form.css";
+// import "./Form.css";
+import styles from "./Form.module.css";
 import { useState, useEffect } from "react";
 
 export default function Form({ onFormSubmit, resetForm }) {
