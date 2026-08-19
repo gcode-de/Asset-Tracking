@@ -1,198 +1,131 @@
-# 📊 Asset Tracker
+# Asset Tracker
 
-> A modern, full-stack web application for tracking and managing investment portfolios with real-time price updates from multiple asset classes.
+A full-stack portfolio tracker for stocks, crypto, precious metals, real estate and cash.
 
-![Next.js](https://img.shields.io/badge/Next.js-16.0-black?logo=next.js)
-![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript)
-![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb)
+[![Live demo](https://img.shields.io/badge/Live_demo-Open_the_showcase-059669?style=for-the-badge)](https://asset-tracker.samuelgesang.de/?demo=true)
+[![Quality](https://github.com/gcode-de/Asset-Tracking/actions/workflows/quality.yml/badge.svg)](https://github.com/gcode-de/Asset-Tracking/actions/workflows/quality.yml)
 
-## 🎯 Overview
+**[Try the anonymous interactive demo →](https://asset-tracker.samuelgesang.de/?demo=true)**
 
-Asset Tracker is a comprehensive portfolio management application that enables users to track their investments across multiple asset classes including cryptocurrencies, stocks, precious metals, real estate, and cash. The app integrates with the Alphavantage API to provide real-time market data while implementing intelligent rate limiting and caching strategies.
+The showcase uses bundled, anonymized data and stores changes only in local storage. It needs no account, MongoDB connection or Alpha Vantage request, so the complete create/filter/edit journey remains reliable even when external services are unavailable.
 
-**Live Demo:** _(Add your deployment URL here)_
+![Portfolio overview with allocation and performance](docs/screenshots/portfolio-overview.png)
 
-## ✨ Key Features
+## Problem and audience
 
-### 💼 Portfolio Management
+Personal wealth is often spread across brokers, wallets, metals, property and cash, making total value and allocation difficult to understand. Asset Tracker gives self-directed investors one focused place to maintain those holdings and compare current value with their cost basis. It is designed for people who need a lightweight overview rather than an order-execution or accounting platform.
 
-- **Multi-Asset Support**: Track stocks, cryptocurrencies, precious metals, real estate, and cash holdings
-- **Smart Search**: Real-time asset search with auto-complete functionality for stocks and 15+ popular cryptocurrencies
-- **Flexible CRUD Operations**: Add, edit, delete, and restore assets with full data persistence
-- **Favorites System**: Mark frequently viewed assets for quick access
+## Product capabilities
 
-### 📈 Real-Time Data Integration
+- Create, edit, soft-delete, restore, filter and sort holdings across five asset classes.
+- See total portfolio value, cost-basis performance and allocation at a glance.
+- Search supported instruments and cache market prices for signed-in portfolios.
+- Explore every critical interaction in an independent demo with deterministic data.
+- Use keyboard-accessible Radix dialogs, labelled controls and announced loading/error states.
 
-- **Alphavantage API Integration**:
-  - `SYMBOL_SEARCH` for stock/ETF discovery
-  - `GLOBAL_QUOTE` for stock prices
-  - `CURRENCY_EXCHANGE_RATE` for cryptocurrency valuations
-- **Intelligent Rate Limiting**: Database-backed API call counter (25 calls/day free tier)
-- **Price Caching**: MongoDB-based price storage with upsert pattern to prevent duplicates
-- **Multi-User Optimization**: Deduplicates API calls across all users to maximize efficiency
+## Screens
 
-### 🎨 Modern UI/UX
+| Filtered portfolio | Add or edit a holding |
+| --- | --- |
+| ![Crypto filter applied](docs/screenshots/filtered-assets.png) | ![Accessible add asset dialog](docs/screenshots/asset-dialog.png) |
 
-- **Responsive Design**: Mobile-first approach using Tailwind CSS
-- **Component Library**: Built with shadcn/ui and Radix UI primitives
-- **Smart Indicators**:
-  - Color-coded API limit badges (green → yellow → red)
-  - "Time since update" displays with auto-refresh
-  - Loading states and disabled buttons based on API availability
-- **Advanced Filtering**: Sort by value, name, or date; filter by asset type; show/hide deleted items
+Screenshots are generated from the local demo with `npm run docs:screenshots` while the development server is running.
 
-### 🔐 Authentication & Data Security
+## Architecture
 
-- **NextAuth.js Integration**: Secure authentication flow
-- **User Isolation**: Each user's assets stored separately with proper session management
-- **Secure Database**: Cloud-hosted MongoDB with proper indexing and validation
-
-### 🏗️ Technical Architecture
-
-- **Full TypeScript**: 100% TypeScript codebase for type safety
-- **API Routes**: RESTful endpoints built with Next.js API routes
-- **State Management**: SWR for server state, React hooks for UI state
-- **Real-Time Updates**: Polling mechanism for API limit badge (10s interval)
-
-## 🛠️ Tech Stack
-
-### Frontend
-
-- **Framework**: Next.js 16.0.10 (React 19.2.3)
-- **Language**: TypeScript 5.9.3
-- **Styling**: Tailwind CSS + shadcn/ui components
-- **State**: SWR (data fetching), React hooks
-- **Icons**: Lucide React
-- **Forms**: React Hook Form + Zod validation
-
-### Backend
-
-- **Runtime**: Node.js (Next.js API routes)
-- **Database**: MongoDB (Mongoose ODM)
-- **Authentication**: NextAuth.js
-- **HTTP Client**: Axios
-- **External API**: Alphavantage (free tier)
-
-### Developer Experience
-
-- **Type Safety**: Full TypeScript support
-- **Linting**: ESLint with Next.js config
-- **Code Quality**: Prettier formatting (auto-format on save)
-
-## 📦 Installation
-
-### Prerequisites
-
-- Node.js 18+
-- pnpm (or npm/yarn)
-- MongoDB database (Atlas or local)
-- Alphavantage API key ([Get free key](https://www.alphavantage.co/support/#api-key))
-
-### Setup
-
-1. **Clone the repository**
-
-```bash
-git clone https://github.com/yourusername/asset-tracker.git
-cd asset-tracker
+```mermaid
+flowchart LR
+    Browser[Next.js UI\nReact + Radix] -->|server state| SWR[SWR cache]
+    SWR --> API[Next.js API routes]
+    API --> Auth[NextAuth session]
+    API --> Models[Mongoose models]
+    Models --> Mongo[(MongoDB)]
+    API -->|rate-limited misses| AV[Alpha Vantage]
+    AV --> Price[(Price cache)]
+    Demo[Demo mode] -->|fixtures + localStorage| Browser
+    Demo -. no calls .-> AV
+    Demo -. no calls .-> Mongo
 ```
 
-2. **Install dependencies**
+The Pages Router keeps UI and server endpoints in one deployable Next.js application. Authenticated requests resolve the user from the server session; the demo takes an intentionally separate client-only path.
+
+## Technical decisions
+
+### Price caching
+
+Market prices live in a dedicated `Price` collection and are upserted by normalized symbol. Holdings reference the latest cached value first, while Alpha Vantage is called only by the explicit refresh flow; this keeps the portfolio readable when the provider is slow or unavailable and prevents duplicate price documents.
+
+### Rate limiting
+
+`ApiCounter` stores a daily count keyed by date and a SHA-256 identifier of the API key. The server checks the counter before each refresh, stops on provider throttling and exposes remaining calls to the UI, protecting the 25-request free-tier budget across users.
+
+### Mongoose models
+
+Small, user-owned holdings are embedded in the `User` document so a portfolio is loaded and updated as one aggregate. Cross-user price data and the API counter use separate indexed models because they have independent lifecycles and can be shared without weakening user isolation.
+
+### Server and UI state
+
+SWR owns remote user, price and counter data and revalidates it after mutations. React state owns short-lived concerns such as filters, sort order and dialog state; demo holdings are the sole exception and are persisted to local storage to keep the public showcase deterministic and infrastructure-free.
+
+## Quality strategy
+
+| Layer | Coverage |
+| --- | --- |
+| Vitest + React Testing Library | Performance/allocation calculation, filter interaction, accessible asset editing and calculated values |
+| Playwright | Demo entry → create asset → filter → edit → verify recalculated value |
+| GitHub Actions | ESLint, TypeScript, component tests, production build and Chromium E2E |
+
+Run the same checks locally:
 
 ```bash
-pnpm install
+npm run lint
+npm run typecheck
+npm test
+npm run test:e2e
+npm run build
 ```
 
-3. **Environment Configuration**
+## Local setup
 
-Create a `.env.local` file in the root directory:
+Requirements: Node.js 22+, npm, MongoDB and an Alpha Vantage key for live price refreshes.
 
-```env
-# MongoDB
-MONGODB_URI=your_mongodb_connection_string
+```bash
+git clone https://github.com/gcode-de/Asset-Tracking.git
+cd Asset-Tracking
+npm ci
+cp .env.example .env.local
+npm run dev
+```
 
-# NextAuth
+Create `.env.local` with the services you want to enable:
+
+```dotenv
+MONGODB_URI=mongodb://localhost:27017/asset-tracker
 NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your_secret_key_here
-
-# Alphavantage
-ALPHAVANTAGE_API_KEY=your_api_key_here
+NEXTAUTH_SECRET=replace-with-a-random-secret
+GITHUB_ID=
+GITHUB_SECRET=
+GOOGLE_ID=
+GOOGLE_SECRET=
+ALPHAVANTAGE_KEY=
 ```
 
-4. **Run the development server**
+The interactive demo at `http://localhost:3000/?demo=true` works without any of these values. Live accounts require MongoDB, a NextAuth secret and at least one configured OAuth provider; Alpha Vantage is required only for instrument search and price refresh.
 
-```bash
-pnpm dev
+## Repository map
+
+```text
+src/
+├── components/       UI primitives and product components
+├── db/models/        User, Price and ApiCounter schemas
+├── lib/demo.ts       anonymized showcase fixtures and local persistence
+├── pages/api/        authenticated portfolio and market-data endpoints
+└── pages/index.tsx   live/demo orchestration and product states
+e2e/                  Playwright critical journey
+docs/screenshots/     reproducible README media
+.github/workflows/    CI quality gates
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+## Deployment
 
-## 🚀 Production Build
-
-```bash
-pnpm build
-pnpm start
-```
-
-## 📁 Project Structure
-
-```
-asset-tracker/
-├── src/
-│   ├── components/          # React components
-│   │   ├── ApiLimitBadge/  # API usage display
-│   │   ├── AssetControls/  # Action buttons
-│   │   ├── AssetDialog/    # Add/Edit modal
-│   │   ├── AssetList/      # Asset grid display
-│   │   ├── AssetSearchDialog/ # Alphavantage search
-│   │   ├── Filters/        # Sort & filter controls
-│   │   ├── Prices/         # Price management UI
-│   │   └── ui/             # shadcn/ui primitives
-│   ├── db/                 # Database connection & models
-│   ├── pages/
-│   │   ├── api/            # API routes
-│   │   ├── _app.js         # App wrapper
-│   │   └── index.js        # Main page
-│   └── styles/
-│       └── globals.css     # Global styles
-├── public/                 # Static assets
-└── tailwind.config.js     # Tailwind configuration
-```
-
-## 🎯 Key Implementations
-
-### Rate Limiting Architecture
-
-The app implements a sophisticated rate limiting system to maximize the free tier (25 calls/day):
-
-- **Database Counter**: Tracks daily API usage across all users
-- **Server-Side Enforcement**: API endpoint checks counter before making calls
-- **Multi-User Deduplication**: Fetches all users' assets, removes duplicates, then queries API
-- **Real-Time UI Updates**: Badge polls counter every 10s, disables buttons when limit reached
-- **Color-Coded Warnings**: Green (>10), Yellow (2-10), Red (≤1 remaining)
-
-### Price Caching Strategy
-
-The app uses MongoDB to cache price data with an upsert pattern to prevent duplicates, ensuring each symbol has exactly one price record that gets updated rather than creating new entries.
-
-### Asset Search Flow
-
-1. User types in search dialog (300ms debounce)
-2. Frontend calls API with search query
-3. Backend checks hardcoded crypto list (15 symbols)
-4. If crypto: returns immediately with EUR exchange data
-5. If not crypto: calls Alphavantage `SYMBOL_SEARCH`
-6. Results merged and displayed with asset class badges
-7. User selects → Asset dialog opens with pre-filled data
-
-## 🔄 Possible future Enhancements
-
-- [ ] Historical price charts (Chart.js integration)
-- [ ] Portfolio performance analytics
-- [ ] Support for custom asset types
-- [ ] Multi-currency display
-- [ ] Dark mode
-- [ ] PWA support for offline access
-
-⭐ **Star this repo** if you find it helpful!
+The application is deployed on Netlify. Production needs the same environment variables as local live mode; the demo route remains operational independently of MongoDB and Alpha Vantage.
