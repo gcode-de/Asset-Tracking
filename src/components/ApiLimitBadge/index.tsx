@@ -24,7 +24,7 @@ const getApiLimitInfo = async (): Promise<ApiLimitInfo> => {
   }
 };
 
-const getColorAndIcon = (remaining: number, limit: number) => {
+const getColorAndIcon = (remaining: number) => {
   if (remaining < 0 || remaining === 0) {
     return {
       color: "bg-red-100 border-red-300 text-red-700",
@@ -75,11 +75,11 @@ export default function ApiLimitBadge({ onRemainingChange }: ApiLimitBadgeProps)
     // Refresh every 10 seconds
     const interval = setInterval(loadCounter, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [onRemainingChange]);
 
   if (!mounted) return null;
 
-  const { color, icon: IconComponent, status } = getColorAndIcon(info.remaining, info.limit);
+  const { color, icon: IconComponent, status } = getColorAndIcon(info.remaining);
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(0, 0, 0, 0);

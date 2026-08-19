@@ -53,3 +53,6 @@ lerna-debug.log*
 # Next.js
 .next/
 out
+coverage/
+playwright-report/
+test-results/

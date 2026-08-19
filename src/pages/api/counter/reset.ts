@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Remove old index if exists (migration for schema change)
     try {
       await ApiCounter.collection.dropIndex("date_1");
-    } catch (e) {
+    } catch {
       // Index might not exist, ignore
     }
 

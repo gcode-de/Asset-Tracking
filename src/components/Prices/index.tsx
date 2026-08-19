@@ -70,7 +70,7 @@ export default function Prices() {
       )
     );
     return max;
-  }, [prices]);
+  }, [filteredPrices]);
 
   // Update "time since" display every minute
   useEffect(() => {

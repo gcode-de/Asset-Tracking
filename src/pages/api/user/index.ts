@@ -5,18 +5,6 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-interface AssetUpdateBody {
-  id: string | number;
-  name?: string;
-  quantity?: number;
-  notes?: string;
-  type?: string;
-  abb?: string;
-  value?: number;
-  baseValue?: number;
-  isDeleted?: boolean;
-}
-
 const upsertEmbeddedAsset = (assets: IAsset[] = [], id: string | number, update: Partial<IAsset>) => {
   return assets.map((asset) => {
     const match = asset?.id === id || `${asset?.id}` === `${id}`;

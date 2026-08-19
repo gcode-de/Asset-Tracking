@@ -2,7 +2,7 @@ import dbConnect from "@/db/connect";
 import Price from "@/db/models/Price";
 import User from "@/db/models/User";
 import ApiCounter from "@/db/models/ApiCounter";
-import { findOneDoc, createDoc, findOneAndUpdateDoc } from "@/db/utils";
+import { findOneDoc, createDoc } from "@/db/utils";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import type { NextApiRequest, NextApiResponse } from "next";
@@ -109,7 +109,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Remove old index if exists (migration for schema change)
     try {
       await ApiCounter.collection.dropIndex("date_1");
-    } catch (e) {
+    } catch {
       // Index might not exist, ignore
     }
 

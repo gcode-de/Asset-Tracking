@@ -21,12 +21,11 @@ export interface AssetType {
 interface AssetProps {
   asset: AssetType;
   handleEditAsset: (id: string | number) => void;
-  handleDeleteAsset?: (id: string | number) => void;
   handleUnDeleteAsset?: (id: string | number) => void;
   handleUpdatePrice?: (symbol: string) => void;
 }
 
-export default function Asset({ asset, handleEditAsset, handleDeleteAsset, handleUnDeleteAsset, handleUpdatePrice }: AssetProps) {
+export default function Asset({ asset, handleEditAsset, handleUnDeleteAsset, handleUpdatePrice }: AssetProps) {
   const bgForType = (type: string): string => {
     const key = (type ?? "")
       .toString()

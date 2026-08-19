@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Plus, Search } from "lucide-react";
+import { Plus, RefreshCcw, Search } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState } from "react";
 import AssetSearchDialog from "@/components/AssetSearchDialog";
@@ -31,6 +31,9 @@ export default function AssetControls({ handleUpdateValues, onAdd, onSearch, api
   };
   return (
     <div className="flex gap-2 justify-end w-full">
+      <Button variant="outline" size="icon" aria-label="Refresh prices" onClick={onReload} disabled={updating || (!demoMode && apiRemaining <= 0)}>
+        <RefreshCcw className={`h-4 w-4 ${updating ? "animate-spin" : ""}`} />
+      </Button>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
