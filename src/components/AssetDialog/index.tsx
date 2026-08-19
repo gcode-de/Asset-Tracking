@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import Form from "@/components/Form";
@@ -12,9 +12,10 @@ interface AssetDialogProps {
   onSubmit?: (e: FormEvent<HTMLFormElement>, initialValues?: Partial<AssetType> | null) => void;
   onCancel?: () => void;
   onDelete?: (id: string | number) => void;
+  isSaving?: boolean;
 }
 
-export default function AssetDialog({ open, onOpenChange, initialValues, onSubmit, onCancel, onDelete }: AssetDialogProps) {
+export default function AssetDialog({ open, onOpenChange, initialValues, onSubmit, onCancel, onDelete, isSaving = false }: AssetDialogProps) {
   const assetId = initialValues?._id ?? initialValues?.id;
   const hasAssetId = assetId !== undefined && assetId !== null && assetId !== "";
 
@@ -39,22 +40,25 @@ export default function AssetDialog({ open, onOpenChange, initialValues, onSubmi
       >
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">{hasAssetId ? "Edit Asset" : "Add Asset"}</DialogTitle>
+          <DialogDescription>
+            {hasAssetId ? "Update the holding details. The current value is calculated automatically." : "Add a holding to your portfolio. Required fields are marked with an asterisk."}
+          </DialogDescription>
         </DialogHeader>
         <Form onFormSubmit={handleSubmit} resetForm={onCancel} formId="asset-dialog-form" hideActions initialValues={initialValues} />
         <DialogFooter className="flex items-center justify-between">
           {hasAssetId ? (
-            <Button variant="ghost" size="icon" onClick={handleDelete}>
+            <Button variant="ghost" size="icon" onClick={handleDelete} aria-label={`Delete ${initialValues?.name || "asset"}`} disabled={isSaving}>
               <Trash2 className="h-4 w-4" />
             </Button>
           ) : (
             <span />
           )}
           <div className="flex gap-2">
-            <Button variant="secondary" type="button" onClick={onCancel}>
+            <Button variant="secondary" type="button" onClick={onCancel} disabled={isSaving}>
               Cancel
             </Button>
-            <Button type="submit" form="asset-dialog-form">
-              Save
+            <Button type="submit" form="asset-dialog-form" disabled={isSaving} aria-busy={isSaving}>
+              {isSaving ? "Saving…" : "Save"}
             </Button>
           </div>
         </DialogFooter>

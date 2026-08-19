@@ -58,7 +58,7 @@ export default function Form({ onFormSubmit, resetForm, formId = "asset-form", h
         <div className="grid gap-2">
           <Label htmlFor="assetTypeField">Type</Label>
           <Select onValueChange={setSelectedType} value={selectedType} required>
-            <SelectTrigger id="assetTypeField" aria-label="Asset Type">
+            <SelectTrigger id="assetTypeField" aria-label="Asset type" aria-required="true">
               <SelectValue placeholder="Select a type" />
             </SelectTrigger>
             <SelectContent>
@@ -79,9 +79,9 @@ export default function Form({ onFormSubmit, resetForm, formId = "asset-form", h
 
         <div className="grid gap-2">
           <Label htmlFor="abbField">Symbol / Ticker</Label>
-          <Input id="abbField" name="abb" value={abb} onChange={handleAbbChange} placeholder="BTC, AAPL, 4GLD.DE..." />
+          <Input id="abbField" name="abb" value={abb} onChange={handleAbbChange} placeholder="BTC, AAPL, 4GLD.DE..." aria-describedby={showSymbolWarning ? "symbol-warning" : undefined} />
           {showSymbolWarning && (
-            <div className="flex items-start gap-2 p-2 text-xs bg-amber-50 border border-amber-200 rounded">
+            <div id="symbol-warning" className="flex items-start gap-2 p-2 text-xs bg-amber-50 border border-amber-200 rounded" role="status">
               <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
               <div className="text-amber-900">
                 <span className="font-semibold">No automatic price updates:</span> This asset type requires a valid symbol (e.g., stock ticker or
@@ -94,7 +94,7 @@ export default function Form({ onFormSubmit, resetForm, formId = "asset-form", h
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
             <Label htmlFor="qtyField">Units *</Label>
-            <Input required id="qtyField" name="quantity" type="number" step="any" value={qty} onChange={handleQtyChange} placeholder="0.05" />
+            <Input required id="qtyField" name="quantity" type="number" step="any" min="0" value={qty} onChange={handleQtyChange} placeholder="0.05" />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="basePriceField">Unit Price *</Label>
@@ -104,6 +104,7 @@ export default function Form({ onFormSubmit, resetForm, formId = "asset-form", h
               name="baseValue"
               type="number"
               step="any"
+              min="0"
               value={unitPrice}
               onChange={handleUnitPriceChange}
               placeholder="50000"

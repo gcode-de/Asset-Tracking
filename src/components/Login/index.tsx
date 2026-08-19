@@ -1,22 +1,21 @@
 import { useSession, signIn, signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 
 export default function Login() {
   const { data: session } = useSession();
   if (session) {
     return (
-      <div className="mb-4 text-sm text-gray-600">
-        {session.user?.email || session.user?.name}
-        <button className="mx-2" onClick={() => signOut()}>
-          sign out
-        </button>
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <span className="max-w-48 truncate">{session.user?.email || session.user?.name}</span>
+        <Button variant="ghost" size="sm" onClick={() => signOut()}>
+          Sign out
+        </Button>
       </div>
     );
   }
   return (
-    <div className="mb-4 text-sm text-gray-600">
-      <button className="mx-2" onClick={() => signIn()}>
-        register/sign in
-      </button>
-    </div>
+    <Button variant="outline" size="lg" onClick={() => signIn()}>
+      Sign in
+    </Button>
   );
 }

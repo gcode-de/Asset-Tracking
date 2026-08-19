@@ -31,7 +31,7 @@ export default function App() {
   const router = useRouter();
   const demoMode = router.isReady && router.query.demo === "true";
   const { toast } = useToast();
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const [assets, setAssets] = useState<AssetType[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState<Partial<AssetType> | null>(null);
@@ -45,7 +45,7 @@ export default function App() {
     () => axios.create({ baseURL: "/api", headers: { "Content-Type": "application/json" } }),
     [],
   );
-  const { data: user, error: userError, isLoading } = useSWR<UserData>(router.isReady && !demoMode ? "/api/user" : null);
+  const { data: user, error: userError, isLoading } = useSWR<UserData>(router.isReady && !demoMode && sessionStatus === "authenticated" ? "/api/user" : null);
 
   useEffect(() => {
     if (demoMode) setAssets(readDemoAssets());
@@ -197,7 +197,7 @@ export default function App() {
     return matchesType && (showDeleted || !asset.isDeleted);
   });
 
-  if (!router.isReady || (!demoMode && isLoading)) return <LoadingState />;
+  if (!router.isReady || (!demoMode && (sessionStatus === "loading" || isLoading))) return <LoadingState />;
   if (!demoMode && userError) return <WelcomeState error />;
   if (!demoMode && !user) return <WelcomeState />;
 
@@ -223,7 +223,7 @@ export default function App() {
       {!demoMode && <Prices />}
       {!demoMode && <div className="hidden"><ApiLimitBadge onRemainingChange={setApiRemaining} /></div>}
       <Footer><TotalValue value={assets.filter((asset) => !asset.isDeleted).reduce((sum, asset) => sum + (asset.value || 0), 0)} /></Footer>
-      <AssetDialog open={dialogOpen} onOpenChange={setDialogOpen} initialValues={editingAsset} onSubmit={handleFormSubmit} onDelete={(id) => setDeleted(id, true)} onCancel={() => { setDialogOpen(false); setEditingAsset(null); }} />
+      <AssetDialog open={dialogOpen} onOpenChange={setDialogOpen} initialValues={editingAsset} onSubmit={handleFormSubmit} onDelete={(id) => setDeleted(id, true)} onCancel={() => { setDialogOpen(false); setEditingAsset(null); }} isSaving={isSaving} />
     </main>
   );
 }

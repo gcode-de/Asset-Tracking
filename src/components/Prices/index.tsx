@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import ApiLimitBadge from "@/components/ApiLimitBadge";
-import { Clock, RotateCcw } from "lucide-react";
+import { AlertCircle, Clock, RotateCcw } from "lucide-react";
 
 interface Price {
   symbol: string;
@@ -149,6 +149,8 @@ export default function Prices() {
         <CardTitle>Prices</CardTitle>
       </CardHeader>
       <CardContent>
+        {error && <div className="mb-4 flex gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert"><AlertCircle className="h-4 w-4 mt-0.5" />Prices could not be loaded. Your saved holdings are unaffected.</div>}
+        {!prices && !error && <div className="mb-4 space-y-2" aria-busy="true" aria-label="Loading prices"><div className="h-4 w-1/3 animate-pulse rounded bg-muted" /><div className="h-10 animate-pulse rounded bg-muted" /></div>}
         <div className="mb-6 space-y-4">
           {/* API Limit Badge */}
           <ApiLimitBadge onRemainingChange={setRemaining} />
@@ -226,6 +228,7 @@ export default function Prices() {
             )}
           </div>
         )}
+        {Array.isArray(prices) && filteredPrices.length === 0 && !error && <p className="block py-6 text-center text-sm text-muted-foreground">No cached market prices for this portfolio yet.</p>}
         {Array.isArray(filteredPrices) && filteredPrices.length > 0 && (
           <Table>
             <TableHeader>

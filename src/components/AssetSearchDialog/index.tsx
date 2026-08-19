@@ -1,5 +1,6 @@
 import { useState, ChangeEvent, FormEvent, useRef } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, Plus, AlertCircle, Lightbulb } from "lucide-react";
@@ -104,6 +105,7 @@ export default function AssetSearchDialog({ open, onOpenChange, onAddAsset, demo
       <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>Search Assets</DialogTitle>
+          <DialogDescription>{demoMode ? "Search the bundled demo catalog. No external service is contacted." : "Search by company name or ticker and select a result to prefill the asset form."}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 flex-none">
@@ -112,8 +114,10 @@ export default function AssetSearchDialog({ open, onOpenChange, onAddAsset, demo
 
           {/* Search Form */}
           <form onSubmit={handleSearch} className="space-y-3">
+            <Label htmlFor="asset-search" className="sr-only">Symbol or asset name</Label>
             <div className="flex gap-2">
               <Input
+                id="asset-search"
                 placeholder="Search by symbol (AAPL, BTC) or name (Apple, Bitcoin)..."
                 value={searchQuery}
                 onChange={handleSearchChange}
@@ -128,7 +132,7 @@ export default function AssetSearchDialog({ open, onOpenChange, onAddAsset, demo
 
           {/* Error State */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex gap-3">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex gap-3" role="alert">
               <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div>
                 <div className="font-semibold text-sm text-red-900">Search Error</div>
@@ -143,8 +147,9 @@ export default function AssetSearchDialog({ open, onOpenChange, onAddAsset, demo
         </div>
 
         {/* Results - Scrollable Section */}
-        <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pr-2 border-t border-gray-200 pt-4 mt-4">
-          {results.length > 0 ? (
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pr-2 border-t border-gray-200 pt-4 mt-4" aria-live="polite" aria-busy={isLoading}>
+          {isLoading && <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Searching assets…</div>}
+          {!isLoading && results.length > 0 ? (
             results.map((result) => (
               <div key={result.symbol} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent transition-colors">
                 <div className="flex-1">
@@ -168,8 +173,6 @@ export default function AssetSearchDialog({ open, onOpenChange, onAddAsset, demo
                 </div>
               </div>
             ))
-          ) : !isLoading && !error && searchQuery ? (
-            <div className="text-sm text-muted-foreground text-center py-8">Searching...</div>
           ) : !isLoading && !error && !searchQuery ? (
             <div className="text-sm text-muted-foreground text-center py-8">
               Enter a symbol or name to search for assets

@@ -22,11 +22,11 @@ interface FiltersProps {
 
 export default function Filters({ showDeleted, onToggleDeleted, selectedTypes = [], onToggleType, sortBy = "date", onSortChange }: FiltersProps) {
   return (
-    <div id="assetFilters" className="flex items-center gap-1 flex-wrap">
+    <div id="assetFilters" className="flex items-center gap-1 flex-wrap" aria-label="Filter and sort assets">
       {typeOptions.map((opt) => {
         const active = selectedTypes.includes(opt.value);
         return (
-          <Button key={opt.value} variant={active ? "default" : "outline"} size="sm" onClick={() => onToggleType?.(opt.value)}>
+          <Button key={opt.value} variant={active ? "default" : "outline"} size="sm" onClick={() => onToggleType?.(opt.value)} aria-pressed={active}>
             {opt.label}
           </Button>
         );

@@ -33,15 +33,18 @@ export default async function handler(request: NextApiRequest, response: NextApi
   const session = await getServerSession(request, response, authOptions);
   const userEmail = session?.user?.email;
 
+  if (!userEmail) {
+    return response.status(401).json({ error: "Unauthorized" });
+  }
+
   switch (method) {
     case "GET":
-      const userWithAssets = await User.findOne({ email: userEmail || "null" });
+      const userWithAssets = await User.findOne({ email: userEmail });
       return response.status(200).json(userWithAssets);
 
     case "POST":
       try {
-        const userId = request.body.userId;
-        const user = await User.findById(userId);
+        const user = await User.findOne({ email: userEmail });
         if (!user) {
           return response.status(404).json({ error: "User not found" });
         }
@@ -71,7 +74,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
 
     case "PUT":
       try {
-        const user = await User.findOne({ email: userEmail || "null" });
+        const user = await User.findOne({ email: userEmail });
         if (!user) {
           return response.status(404).json({ error: "User not found" });
         }
