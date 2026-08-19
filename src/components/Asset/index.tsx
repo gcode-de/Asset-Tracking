@@ -15,6 +15,7 @@ export interface AssetType {
   baseValue: number;
   isDeleted: boolean;
   priceUpdatedAt?: string | Date;
+  costBasis?: number;
 }
 
 interface AssetProps {

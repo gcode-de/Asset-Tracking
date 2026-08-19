@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Plus, AlertCircle, Lightbulb } from "lucide-react";
 import axios from "axios";
 import { FavoriteToggle, FavoritesList } from "@/components/Favorites";
+import { demoSearchResults } from "@/lib/demo";
 
 interface SearchResult {
   symbol: string;
@@ -20,9 +21,10 @@ interface AssetSearchDialogProps {
   open: boolean;
   onOpenChange?: (open: boolean) => void;
   onAddAsset?: (symbol: string, name: string, assetClass?: string) => void;
+  demoMode?: boolean;
 }
 
-export default function AssetSearchDialog({ open, onOpenChange, onAddAsset }: AssetSearchDialogProps) {
+export default function AssetSearchDialog({ open, onOpenChange, onAddAsset, demoMode = false }: AssetSearchDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +42,13 @@ export default function AssetSearchDialog({ open, onOpenChange, onAddAsset }: As
     setError(null);
 
     try {
+      if (demoMode) {
+        const normalized = query.trim().toLowerCase();
+        const matches = demoSearchResults.filter((item) => item.symbol.toLowerCase().includes(normalized) || item.name.toLowerCase().includes(normalized));
+        setResults(matches);
+        if (!matches.length) setError("No demo assets match your search.");
+        return;
+      }
       const response = await axios.get(`/api/assets/search`, {
         params: { query },
       });

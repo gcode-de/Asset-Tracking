@@ -1,19 +1,25 @@
 import AssetList from "@/components/AssetList";
 import AssetControls from "@/components/AssetControls";
 import Filters from "@/components/Filters";
-import SnackBar from "@/components/SnackBar";
 import Footer from "@/components/Footer";
 import TotalValue from "@/components/TotalValue";
 import Login from "@/components/Login";
-import useSWR, { mutate } from "swr";
-import axios, { AxiosError } from "axios";
-import { useEffect, useState, FormEvent, useMemo } from "react";
-import { useToast } from "@/hooks/use-toast";
 import AssetDialog from "@/components/AssetDialog";
-import { AssetType } from "@/components/Asset";
 import Prices from "@/components/Prices";
 import ApiLimitBadge from "@/components/ApiLimitBadge";
+import PortfolioOverview from "@/components/PortfolioOverview";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import type { AssetType } from "@/components/Asset";
+import { demoAssets, readDemoAssets, writeDemoAssets, DEMO_STORAGE_KEY } from "@/lib/demo";
+import useSWR, { mutate } from "swr";
+import axios from "axios";
+import { useEffect, useState, FormEvent, useMemo } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import { AlertCircle, ArrowRight, Database, RotateCcw, WalletCards } from "lucide-react";
 
 interface UserData {
   _id: string;
@@ -22,173 +28,142 @@ interface UserData {
 }
 
 export default function App() {
+  const router = useRouter();
+  const demoMode = router.isReady && router.query.demo === "true";
   const { toast } = useToast();
   const { data: session } = useSession();
-  const initialAssets: AssetType[] = [];
-  const [assets, setAssets] = useState<AssetType[]>(initialAssets);
+  const [assets, setAssets] = useState<AssetType[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState<Partial<AssetType> | null>(null);
   const [showDeleted, setShowDeleted] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"value" | "name" | "date">("value");
-  const [apiRemaining, setApiRemaining] = useState<number>(25);
+  const [apiRemaining, setApiRemaining] = useState(25);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const apiClient = axios.create({
-    baseURL: "/api",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  const { data: user, isLoading } = useSWR<UserData>("/api/user");
+  const apiClient = useMemo(
+    () => axios.create({ baseURL: "/api", headers: { "Content-Type": "application/json" } }),
+    [],
+  );
+  const { data: user, error: userError, isLoading } = useSWR<UserData>(router.isReady && !demoMode ? "/api/user" : null);
 
   useEffect(() => {
-    if (!user) {
-      return;
+    if (demoMode) setAssets(readDemoAssets());
+  }, [demoMode]);
+
+  useEffect(() => {
+    if (!user || demoMode) return;
+    let cancelled = false;
+
+    async function loadPrices() {
+      try {
+        const response = await fetch("/api/prices");
+        if (!response.ok) throw new Error("Prices could not be loaded");
+        const prices = await response.json();
+        if (!Array.isArray(prices)) throw new Error("Unexpected price response");
+        const priceMap = new Map(
+          prices.map((price) => [String(price.symbol || "").toUpperCase(), { value: price.value, updatedAt: price.recordedAt || price.timestamp }]),
+        );
+        const merged = user.assets.map((asset) => {
+          const price = priceMap.get(String(asset.abb || "").toUpperCase());
+          return price
+            ? { ...asset, baseValue: price.value, value: (asset.quantity || 0) * price.value, priceUpdatedAt: price.updatedAt }
+            : asset;
+        });
+        if (!cancelled) setAssets(merged);
+      } catch {
+        if (!cancelled) {
+          setAssets(user.assets);
+          toast({ title: "Saved assets loaded", description: "Live prices are temporarily unavailable." });
+        }
+      }
     }
 
-    // Load prices from DB and merge with assets
-    const loadPricesAndUpdateAssets = async () => {
-      try {
-        const pricesResponse = await fetch("/api/prices");
-        const pricesData = await pricesResponse.json();
+    loadPrices();
+    return () => { cancelled = true; };
+  }, [demoMode, toast, user]);
 
-        if (Array.isArray(pricesData)) {
-          // Create price map with value and timestamp
-          const priceMap = new Map(
-            pricesData.map((p: any) => [String(p.symbol || "").toUpperCase(), { value: p.value, updatedAt: p.recordedAt || p.timestamp }]),
-          );
-
-          // Update assets with baseValue and priceUpdatedAt from prices
-          const updatedAssets = user.assets.map((asset: AssetType) => {
-            const priceData = priceMap.get(String(asset.abb || "").toUpperCase());
-            if (priceData) {
-              return {
-                ...asset,
-                baseValue: priceData.value,
-                value: (asset.quantity || 0) * priceData.value,
-                priceUpdatedAt: priceData.updatedAt,
-              };
-            }
-            return asset;
-          });
-
-          setAssets(updatedAssets);
-        } else {
-          setAssets(user.assets);
-        }
-      } catch (err) {
-        console.error("Error loading prices:", err);
-        setAssets(user.assets);
-      }
-    };
-
-    loadPricesAndUpdateAssets();
-  }, [user]);
+  const updateDemoAssets = (updater: (current: AssetType[]) => AssetType[]) => {
+    setAssets((current) => {
+      const next = updater(current);
+      writeDemoAssets(next);
+      return next;
+    });
+  };
 
   async function handleFormSubmit(event: FormEvent<HTMLFormElement>, initialValues?: Partial<AssetType> | null) {
     event.preventDefault();
-    const formData = new FormData(event.target as HTMLFormElement);
-    const formProps: Record<string, any> = Object.fromEntries(formData);
-    const numericFields = ["quantity", "value", "baseValue"];
-    numericFields.forEach((key) => {
-      if (formProps[key] !== undefined && formProps[key] !== "") {
-        formProps[key] = Number(formProps[key]);
-      }
-    });
-    formProps.value = Number(formProps.quantity || 0) * Number(formProps.baseValue || 0);
-    const idFromInitial = initialValues?._id ?? initialValues?.id;
-    const id = idFromInitial ?? formProps.id;
+    setIsSaving(true);
+    const formProps = Object.fromEntries(new FormData(event.currentTarget)) as Record<string, string | number>;
+    ["quantity", "value", "baseValue"].forEach((key) => { formProps[key] = Number(formProps[key] || 0); });
+    formProps.value = Number(formProps.quantity) * Number(formProps.baseValue);
+    const id = initialValues?._id ?? initialValues?.id ?? formProps.id;
     const isEdit = id !== undefined && id !== null && id !== "";
+
     try {
-      if (isEdit) {
-        await apiClient.put(`/user?action=update`, { id, ...formProps });
-        setAssets((prev) => prev.map((a) => (a._id === id || a.id === id ? { ...a, ...(formProps as Partial<AssetType>) } : a)));
+      if (demoMode) {
+        if (isEdit) {
+          updateDemoAssets((current) => current.map((asset) => (asset._id === id || asset.id === id ? { ...asset, ...formProps } as AssetType : asset)));
+          toast({ title: "Demo asset updated" });
+        } else {
+          const created = { ...formProps, id: `demo-${Date.now()}`, isDeleted: false } as unknown as AssetType;
+          updateDemoAssets((current) => [created, ...current]);
+          toast({ title: `${created.name} added to the demo` });
+        }
+      } else if (isEdit) {
+        await apiClient.put("/user?action=update", { id, ...formProps });
+        setAssets((current) => current.map((asset) => (asset._id === id || asset.id === id ? { ...asset, ...formProps } as AssetType : asset)));
         toast({ title: "Asset updated" });
       } else {
-        const payload = { ...formProps, userId: user?._id };
-        const resp = await apiClient.post(`/user`, payload);
-        const created: AssetType = resp.data;
-        setAssets((prev) => [created, ...prev]);
-        toast({ title: `Asset ${created.name} created` });
+        const response = await apiClient.post("/user", { ...formProps, userId: user?._id });
+        setAssets((current) => [response.data, ...current]);
+        toast({ title: `${response.data.name} added` });
       }
-    } catch (e) {
-      const message = e instanceof Error ? e.message : "Error saving asset";
-      toast({ title: message, variant: "destructive" });
-    }
-    setDialogOpen(false);
-    setEditingAsset(null);
-  }
-
-  async function handleDeleteAsset(assetId: string | number) {
-    try {
-      await apiClient.put(`/user?action=softDelete`, { id: assetId });
-      setAssets((prev) => prev.map((a) => (a._id === assetId || a.id === assetId ? { ...a, isDeleted: true } : a)));
-      const assetName = (assets || []).find((asset) => asset._id === assetId || asset.id === assetId)?.name || "Asset";
-      toast({ title: `"${assetName}" deleted` });
+      setDialogOpen(false);
+      setEditingAsset(null);
     } catch (error) {
-      console.error("Fehler beim Soft-Delete des Assets:", error);
-      const message = error instanceof Error ? error.message : "Delete failed";
-      toast({ title: message, variant: "destructive" });
+      toast({ title: "Asset could not be saved", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+    } finally {
+      setIsSaving(false);
     }
   }
 
-  async function handleUnDeleteAsset(assetId: string | number) {
+  async function setDeleted(assetId: string | number, isDeleted: boolean) {
     try {
-      await apiClient.put(`/user?action=softUndelete`, { id: assetId });
-      setAssets((prev) => prev.map((a) => (a._id === assetId || a.id === assetId ? { ...a, isDeleted: false } : a)));
-      const assetName = (assets || []).find((asset) => asset._id === assetId || asset.id === assetId)?.name || "Asset";
-      toast({ title: `"${assetName}" restored` });
+      if (demoMode) {
+        updateDemoAssets((current) => current.map((asset) => (asset._id === assetId || asset.id === assetId ? { ...asset, isDeleted } : asset)));
+      } else {
+        await apiClient.put(`/user?action=${isDeleted ? "softDelete" : "softUndelete"}`, { id: assetId });
+        setAssets((current) => current.map((asset) => (asset._id === assetId || asset.id === assetId ? { ...asset, isDeleted } : asset)));
+      }
+      toast({ title: isDeleted ? "Asset moved to deleted" : "Asset restored" });
     } catch (error) {
-      console.error("Fehler beim Soft-Undelete des Assets:", error);
-      const message = error instanceof Error ? error.message : "Restore failed";
-      toast({ title: message, variant: "destructive" });
+      toast({ title: isDeleted ? "Delete failed" : "Restore failed", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
     }
   }
 
   function handleEditAsset(id: string | number) {
-    const asset = (assets || []).find((a) => a._id === id || a.id === id);
-    setEditingAsset(asset || null);
+    setEditingAsset(assets.find((asset) => asset._id === id || asset.id === id) || null);
     setDialogOpen(true);
   }
 
   async function handleUpdatePrice(symbol: string) {
+    if (demoMode) {
+      toast({ title: "Demo prices are fixed", description: "The showcase never calls Alpha Vantage." });
+      return;
+    }
     if (!session) {
-      toast({ title: "Sign in to update price" });
+      toast({ title: "Sign in to update prices" });
       return;
     }
     try {
-      const resp = await fetch("/api/prices/fetch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({ symbol }),
-      });
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data?.error || "Update failed");
-
-      if (resp.status === 429) {
-        toast({
-          title: "API Limit Reached",
-          description: "Free tier is limited to 25 calls per day",
-          variant: "destructive",
-        });
-      } else {
-        const fetched = data.fetched;
-        if (fetched > 0) {
-          toast({ title: `Updated price for ${symbol}` });
-        } else {
-          // Check if there's a specific error reason
-          const result = data.results?.[0];
-          const reason = result?.reason || "No price found";
-          toast({ title: `Failed to update ${symbol}: ${reason}`, variant: "destructive" });
-        }
-      }
-      // Refresh assets
+      const response = await fetch("/api/prices/fetch", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ symbol }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "Price update failed");
+      toast({ title: data.fetched > 0 ? `${symbol} updated` : `No price found for ${symbol}` });
       mutate("/api/user");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Update failed";
-      toast({ title: message, variant: "destructive" });
+      toast({ title: "Price update failed", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
     }
   }
 
@@ -198,163 +173,69 @@ export default function App() {
   }
 
   function handleSearchAndAddAsset(symbol: string, name: string, assetClass?: string) {
-    setEditingAsset({
-      name: name,
-      abb: symbol,
-      quantity: 0,
-      baseValue: 0,
-      value: 0,
-      type: assetClass || "",
-      notes: "",
-      isDeleted: false,
-    });
+    setEditingAsset({ name, abb: symbol, quantity: 0, baseValue: 0, value: 0, type: assetClass || "", notes: "", isDeleted: false });
     setDialogOpen(true);
   }
 
   async function handleReloadPrices() {
+    if (demoMode) {
+      toast({ title: "Demo prices refreshed", description: "Using the bundled, deterministic snapshot." });
+      return;
+    }
     try {
-      const response = await apiClient.post("/prices/fetch");
-      const data = response.data;
-
-      if (data.fetched > 0) {
-        // Reload prices from DB
-        const pricesResponse = await fetch("/api/prices");
-        const pricesData = await pricesResponse.json();
-
-        if (Array.isArray(pricesData)) {
-          const priceMap = new Map(
-            pricesData.map((p: any) => [String(p.symbol || "").toUpperCase(), { value: p.value, updatedAt: p.recordedAt || p.timestamp }]),
-          );
-
-          const updatedAssets = assets.map((asset: AssetType) => {
-            const priceData = priceMap.get(String(asset.abb || "").toUpperCase());
-            if (priceData) {
-              return {
-                ...asset,
-                baseValue: priceData.value,
-                value: (asset.quantity || 0) * priceData.value,
-                priceUpdatedAt: priceData.updatedAt,
-              };
-            }
-            return asset;
-          });
-
-          setAssets(updatedAssets);
-          mutate("/api/user");
-          setApiRemaining(data.remainingCalls);
-          toast({
-            title: `Updated ${data.fetched} prices`,
-            description: `${data.apiCalls} API calls • ${data.remainingCalls} calls remaining today`,
-          });
-        }
-      } else {
-        toast({ title: "No prices updated", description: "All prices are up to date" });
-      }
+      const { data } = await apiClient.post("/prices/fetch");
+      setApiRemaining(data.remainingCalls);
+      mutate("/api/user");
+      toast({ title: `${data.fetched} prices updated`, description: `${data.remainingCalls} calls remaining today` });
     } catch (error) {
-      const axError = error as any;
-      if (axError.response?.status === 429) {
-        toast({
-          title: "API Limit Reached",
-          description: "You've exceeded the free tier limit (25 calls/day). Try again tomorrow.",
-          variant: "destructive",
-        });
-      } else {
-        const message = error instanceof Error ? error.message : "Failed to reload prices";
-        toast({ title: message, variant: "destructive" });
-      }
+      toast({ title: "Prices could not be refreshed", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
     }
   }
 
-  const handleToggleType = (type: string) => {
-    setSelectedTypes((prev) => (prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]));
-  };
+  const filteredAssets = assets.filter((asset) => {
+    const matchesType = selectedTypes.length ? selectedTypes.includes(asset.type) : true;
+    return matchesType && (showDeleted || !asset.isDeleted);
+  });
 
-  const filteredAssets = assets
-    ? assets.filter((a) => {
-        const typeOk = selectedTypes.length ? selectedTypes.includes(a.type) : true;
-        const deletedOk = showDeleted ? true : !a.isDeleted;
-        return typeOk && deletedOk;
-      })
-    : [];
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="text-lg text-muted-foreground">Loading your assets...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
+  if (!router.isReady || (!demoMode && isLoading)) return <LoadingState />;
+  if (!demoMode && userError) return <WelcomeState error />;
+  if (!demoMode && !user) return <WelcomeState />;
 
   return (
-    <>
-      <div id="wrapper">
-        <Login />
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4">Track your assets!</h1>
-        <div id="assetControls" className="layoutElement">
-          <AssetControls
-            handleUpdateValues={handleReloadPrices}
-            onAdd={handleAddAsset}
-            onSearch={handleSearchAndAddAsset}
-            apiRemaining={apiRemaining}
-          />
+    <main id="wrapper">
+      <header className="mb-8">
+        <div className="flex items-center justify-between gap-4 mb-5">
+          {demoMode ? <div className="flex items-center gap-2 text-sm font-medium text-emerald-700"><Database className="h-4 w-4" />Anonymous local demo</div> : <Login />}
+          {demoMode && <div className="flex items-center gap-2"><Button variant="ghost" size="sm" onClick={() => { window.localStorage.removeItem(DEMO_STORAGE_KEY); setAssets(demoAssets); }}><RotateCcw className="h-4 w-4 mr-2" />Reset demo</Button><Button asChild variant="outline" size="sm"><Link href="/">Exit demo</Link></Button></div>}
         </div>
-        <div className="mb-8">
-          <Filters
-            showDeleted={showDeleted}
-            onToggleDeleted={setShowDeleted}
-            selectedTypes={selectedTypes}
-            onToggleType={handleToggleType}
-            sortBy={sortBy}
-            onSortChange={setSortBy}
-          />
-        </div>
-        {assets ? (
-          <AssetList
-            assets={filteredAssets}
-            sortBy={sortBy}
-            handleDeleteAsset={handleDeleteAsset}
-            handleUnDeleteAsset={handleUnDeleteAsset}
-            handleEditAsset={handleEditAsset}
-            handleUpdatePrice={handleUpdatePrice}
-          ></AssetList>
-        ) : assets.length === 0 && user ? (
-          <div className="flex items-center justify-center min-h-[200px]">
-            <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              <p className="text-lg text-muted-foreground">Loading your assets...</p>
-            </div>
-          </div>
-        ) : (
-          "Please add assets!"
-        )}
-        <Prices />
-        {/* Hidden ApiLimitBadge to sync apiRemaining state */}
-        <div className="hidden">
-          <ApiLimitBadge onRemainingChange={setApiRemaining} />
-        </div>
-        <Footer>
-          <TotalValue value={assets.filter((a) => !a.isDeleted).reduce((sum, asset) => sum + (asset.value || 0), 0)} />
-        </Footer>
-        <SnackBar />
-        <AssetDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          initialValues={editingAsset}
-          onSubmit={handleFormSubmit}
-          onDelete={handleDeleteAsset}
-          onCancel={() => {
-            setDialogOpen(false);
-            setEditingAsset(null);
-          }}
-        />
-      </div>
-    </>
+        <p className="block text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Personal wealth, one clear view</p>
+        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mt-2">Asset Tracker</h1>
+        <p className="block mt-3 max-w-2xl text-muted-foreground">Track stocks, crypto, metals, property and cash without losing sight of your overall allocation.</p>
+      </header>
+
+      <PortfolioOverview assets={assets} />
+      <section aria-labelledby="assets-title">
+        <div className="flex items-center justify-between gap-4 mb-3"><h2 id="assets-title" className="text-2xl font-bold">Assets</h2><AssetControls handleUpdateValues={handleReloadPrices} onAdd={handleAddAsset} onSearch={handleSearchAndAddAsset} apiRemaining={apiRemaining} demoMode={demoMode} /></div>
+        <div className="mb-6"><Filters showDeleted={showDeleted} onToggleDeleted={setShowDeleted} selectedTypes={selectedTypes} onToggleType={(type) => setSelectedTypes((current) => current.includes(type) ? current.filter((item) => item !== type) : [...current, type])} sortBy={sortBy} onSortChange={setSortBy} /></div>
+        {filteredAssets.length ? <AssetList assets={filteredAssets} sortBy={sortBy} handleDeleteAsset={(id) => setDeleted(id, true)} handleUnDeleteAsset={(id) => setDeleted(id, false)} handleEditAsset={handleEditAsset} handleUpdatePrice={handleUpdatePrice} /> : <EmptyState hasFilters={selectedTypes.length > 0 || (!showDeleted && assets.some((asset) => asset.isDeleted))} onAdd={() => handleAddAsset()} onClear={() => { setSelectedTypes([]); setShowDeleted(true); }} />}
+      </section>
+
+      {!demoMode && <Prices />}
+      {!demoMode && <div className="hidden"><ApiLimitBadge onRemainingChange={setApiRemaining} /></div>}
+      <Footer><TotalValue value={assets.filter((asset) => !asset.isDeleted).reduce((sum, asset) => sum + (asset.value || 0), 0)} /></Footer>
+      <AssetDialog open={dialogOpen} onOpenChange={setDialogOpen} initialValues={editingAsset} onSubmit={handleFormSubmit} onDelete={(id) => setDeleted(id, true)} onCancel={() => { setDialogOpen(false); setEditingAsset(null); }} />
+    </main>
   );
+}
+
+function LoadingState() {
+  return <main className="min-h-screen grid place-items-center" aria-busy="true"><div className="text-center"><div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" /><p className="block mt-4 text-muted-foreground">Loading your portfolio…</p></div></main>;
+}
+
+function WelcomeState({ error = false }: { error?: boolean }) {
+  return <main className="min-h-screen grid place-items-center px-6 py-16 bg-slate-50"><div className="w-full max-w-2xl text-center"><WalletCards className="mx-auto h-12 w-12" /><p className="block mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Multi-asset portfolio tracking</p><h1 className="mt-3 text-5xl font-extrabold tracking-tight">All your assets.<br />One honest overview.</h1><p className="block mx-auto mt-5 max-w-xl text-lg text-muted-foreground">Explore the product instantly with anonymized, local data. No account, database or market-data quota required.</p>{error && <Alert variant="destructive" className="mt-6 text-left"><AlertCircle className="h-4 w-4" /><AlertTitle>Live account unavailable</AlertTitle><AlertDescription>The server data could not be loaded. The independent demo is still ready.</AlertDescription></Alert>}<div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3"><Button asChild size="lg" className="w-full sm:w-auto"><Link href="/?demo=true">Open interactive demo <ArrowRight className="ml-2 h-4 w-4" /></Link></Button><Login /></div></div></main>;
+}
+
+function EmptyState({ hasFilters, onAdd, onClear }: { hasFilters: boolean; onAdd: () => void; onClear: () => void }) {
+  return <div className="rounded-xl border border-dashed p-10 text-center mb-8"><WalletCards className="mx-auto h-9 w-9 text-muted-foreground" /><h3 className="mt-4 font-semibold">{hasFilters ? "No assets match these filters" : "Your portfolio is empty"}</h3><p className="block mt-2 text-sm text-muted-foreground">{hasFilters ? "Clear the filters to see the complete portfolio." : "Add your first holding to start tracking its value."}</p><Button className="mt-5" variant={hasFilters ? "outline" : "default"} onClick={hasFilters ? onClear : onAdd}>{hasFilters ? "Clear filters" : "Add first asset"}</Button></div>;
 }

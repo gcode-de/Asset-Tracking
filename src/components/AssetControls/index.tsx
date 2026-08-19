@@ -10,9 +10,10 @@ interface AssetControlsProps {
   onAdd?: (type: string) => void;
   onSearch?: (symbol: string, name: string, assetClass?: string) => void;
   apiRemaining?: number;
+  demoMode?: boolean;
 }
 
-export default function AssetControls({ handleUpdateValues, onAdd, onSearch, apiRemaining = 25 }: AssetControlsProps) {
+export default function AssetControls({ handleUpdateValues, onAdd, onSearch, apiRemaining = 25, demoMode = false }: AssetControlsProps) {
   const [updating, setUpdating] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -63,7 +64,7 @@ export default function AssetControls({ handleUpdateValues, onAdd, onSearch, api
         </Tooltip>
       </TooltipProvider>
 
-      <AssetSearchDialog open={searchOpen} onOpenChange={setSearchOpen} onAddAsset={handleSearchSelect} />
+      <AssetSearchDialog open={searchOpen} onOpenChange={setSearchOpen} onAddAsset={handleSearchSelect} demoMode={demoMode} />
     </div>
   );
 }
