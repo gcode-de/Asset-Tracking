@@ -95,7 +95,7 @@ export default function App() {
     event.preventDefault();
     setIsSaving(true);
     const formProps = Object.fromEntries(new FormData(event.currentTarget)) as Record<string, string | number>;
-    ["quantity", "value", "baseValue"].forEach((key) => { formProps[key] = Number(formProps[key] || 0); });
+    ["quantity", "value", "baseValue", "costBasis"].forEach((key) => { formProps[key] = Number(formProps[key] || 0); });
     formProps.value = Number(formProps.quantity) * Number(formProps.baseValue);
     const id = initialValues?._id ?? initialValues?.id ?? formProps.id;
     const isEdit = id !== undefined && id !== null && id !== "";

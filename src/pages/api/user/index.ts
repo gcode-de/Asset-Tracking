@@ -48,6 +48,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
           abb: request.body.abb ?? "",
           value: request.body.value ?? 0,
           baseValue: request.body.baseValue ?? 0,
+          costBasis: request.body.costBasis ?? request.body.value ?? 0,
           isDeleted: false,
         } as IAsset;
 

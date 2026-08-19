@@ -13,6 +13,7 @@ export interface IAsset {
   abb?: string;
   value: number;
   baseValue: number;
+  costBasis?: number;
   isDeleted: boolean;
 }
 
@@ -33,6 +34,7 @@ const assetSchema = new Schema<IAsset>(
     abb: String,
     value: Number,
     baseValue: Number,
+    costBasis: Number,
     isDeleted: { type: Boolean, default: false },
   },
   { _id: false }

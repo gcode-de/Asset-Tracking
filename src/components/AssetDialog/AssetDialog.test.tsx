@@ -22,9 +22,10 @@ describe("AssetDialog", () => {
     const units = screen.getByLabelText("Units *");
     await user.clear(units);
     await user.type(units, "3");
+    await user.type(screen.getByLabelText("Total Cost Basis"), "240");
     expect(screen.getByLabelText("Current Value (calculated)")).toHaveValue(300);
     await user.click(screen.getByRole("button", { name: "Save" }));
 
-    expect(submitted).toHaveBeenCalledWith(expect.objectContaining({ name: "Index Fund", quantity: "3", value: "300.00" }));
+    expect(submitted).toHaveBeenCalledWith(expect.objectContaining({ name: "Index Fund", quantity: "3", value: "300.00", costBasis: "240" }));
   });
 });

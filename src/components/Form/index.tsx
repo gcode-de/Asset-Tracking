@@ -118,6 +118,12 @@ export default function Form({ onFormSubmit, resetForm, formId = "asset-form", h
         </div>
 
         <div className="grid gap-2">
+          <Label htmlFor="costBasisField">Total Cost Basis</Label>
+          <Input id="costBasisField" name="costBasis" type="number" step="any" min="0" defaultValue={initialValues?.costBasis ?? ""} placeholder="What you originally invested" aria-describedby="costBasisHelp" />
+          <p id="costBasisHelp" className="block text-xs text-muted-foreground">Optional. Used only to calculate portfolio performance.</p>
+        </div>
+
+        <div className="grid gap-2">
           <Label htmlFor="notesField">Notes</Label>
           <Textarea id="notesField" name="notes" defaultValue={initialValues?.notes || ""} placeholder="Additional information..." rows={3} />
         </div>
